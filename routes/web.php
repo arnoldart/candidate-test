@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CltLayupController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SupplierController;
 use Illuminate\Support\Facades\Route;
@@ -18,6 +19,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::resource('suppliers', SupplierController::class)->except(['show', 'create', 'edit']);
+    Route::resource('suppliers.layups', CltLayupController::class)->except(['show', 'create', 'edit']);
 });
 
 require __DIR__.'/auth.php';

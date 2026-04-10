@@ -53,7 +53,6 @@
             }
         }">
          
-        <!-- Search and Filters row -->
         <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-2">
             <form action="{{ route('suppliers.index') }}" method="GET" class="w-full sm:max-w-xs">
                 <label for="search" class="sr-only">Search suppliers by name...</label>
@@ -77,7 +76,6 @@
             </div>
         </div>
 
-        <!-- Table -->
         <div class="bg-white overflow-hidden shadow-sm ring-1 ring-gray-200 rounded-xl">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
@@ -102,7 +100,7 @@
                                 $initials = strtoupper(substr($supplier->name, 0, 2));
                                 $colorStyle = $colors[$loop->index % count($colors)];
                             @endphp
-                            <tr class="hover:bg-gray-50 transition-colors relative group/row">
+                            <tr @click="window.location='{{ route('suppliers.layups.index', $supplier) }}'" class="hover:bg-gray-50 transition-colors relative group/row cursor-pointer">
                                 <td class="whitespace-nowrap py-5 pl-6 pr-3">
                                     <div class="flex items-center">
                                         <div class="h-11 w-11 shrink-0 flex items-center justify-center rounded-full {{ $colorStyle['bg'] }} {{ $colorStyle['text'] }} font-semibold text-sm">
@@ -122,8 +120,8 @@
                                 </td>
                                 <td class="whitespace-nowrap py-5 pl-3 pr-6 text-right text-sm font-medium">
                                     <div class="flex justify-end gap-3 opacity-0 group-hover/row:opacity-100 transition-opacity">
-                                        <button type="button" @click="$dispatch('open-supplier-modal', { isEdit: true, id: {{ $supplier->id }}, name: '{{ addslashes($supplier->name) }}' })" class="text-blue-600 hover:text-blue-900 font-semibold focus:outline-none">Edit</button>
-                                        <form action="{{ route('suppliers.destroy', $supplier) }}" method="POST" class="inline" onsubmit="return confirm('Delete this supplier?');">
+                                        <button type="button" @click.stop="$dispatch('open-supplier-modal', { isEdit: true, id: {{ $supplier->id }}, name: '{{ addslashes($supplier->name) }}' })" class="text-blue-600 hover:text-blue-900 font-semibold focus:outline-none">Edit</button>
+                                        <form action="{{ route('suppliers.destroy', $supplier) }}" method="POST" class="inline" onsubmit="return confirm('Delete this supplier?');" @click.stop>
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="text-red-600 hover:text-red-900 font-semibold">Delete</button>
@@ -143,7 +141,6 @@
             <x-pagination :paginator="$suppliers" />
         </div>
 
-        <!-- Supplier Modal (Create/Edit) -->
         <div x-show="showModal" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true" style="display: none;">
             <div x-show="showModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="showModal = false"></div>
 
