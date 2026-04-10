@@ -4,14 +4,22 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\SupplierRequest;
 use App\Models\Supplier;
+use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class SupplierController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $suppliers = Supplier::orderBy('name')->paginate(1);
+        $query = Supplier::query();
+
+        if ($request->has('search') && $request->search != '') {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        $suppliers = $query->orderBy('name')->paginate(10)->withQueryString();
+        
         return view('suppliers.index', compact('suppliers'));
     }
 

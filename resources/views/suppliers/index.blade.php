@@ -55,15 +55,15 @@
          
         <!-- Search and Filters row -->
         <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-2">
-            <div class="w-full sm:max-w-xs">
+            <form action="{{ route('suppliers.index') }}" method="GET" class="w-full sm:max-w-xs">
                 <label for="search" class="sr-only">Search suppliers by name...</label>
                 <div class="relative rounded-md shadow-sm">
                     <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                         <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                     </div>
-                    <input type="text" name="search" id="search" class="block w-full rounded-md border-gray-300 pl-10 focus:border-[#447A60] focus:ring-[#447A60] sm:text-sm text-gray-500 placeholder-gray-400 py-2.5" placeholder="Search suppliers by name...">
+                    <input type="search" name="search" id="search" value="{{ request('search') }}" class="block w-full rounded-md border-gray-300 pl-10 focus:border-[#447A60] focus:ring-[#447A60] sm:text-sm text-gray-500 placeholder-gray-400 py-2.5" placeholder="Search suppliers by name..." onchange="this.form.submit()">
                 </div>
-            </div>
+            </form>
 
             <div class="flex flex-wrap items-center gap-3">
                 <button type="button" class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-colors">
