@@ -93,11 +93,11 @@
                         @forelse($suppliers as $supplier)
                             @php
                                 $colors = [
-                                    ['bg' => 'bg-[#EBF1FA]', 'text' => 'text-[#4A72B2]'], // NT
-                                    ['bg' => 'bg-[#E6F3EE]', 'text' => 'text-[#3E8D61]'], // AC
-                                    ['bg' => 'bg-[#FDF0E6]', 'text' => 'text-[#CC6A33]'], // MW
-                                    ['bg' => 'bg-[#F4EBFA]', 'text' => 'text-[#8A51B2]'], // TS
-                                    ['bg' => 'bg-[#E6F5F3]', 'text' => 'text-[#3B9282]']  // EL
+                                    ['bg' => 'bg-[#EBF1FA]', 'text' => 'text-[#4A72B2]'],
+                                    ['bg' => 'bg-[#E6F3EE]', 'text' => 'text-[#3E8D61]'], 
+                                    ['bg' => 'bg-[#FDF0E6]', 'text' => 'text-[#CC6A33]'], 
+                                    ['bg' => 'bg-[#F4EBFA]', 'text' => 'text-[#8A51B2]'], 
+                                    ['bg' => 'bg-[#E6F5F3]', 'text' => 'text-[#3B9282]']  
                                 ];
                                 $initials = strtoupper(substr($supplier->name, 0, 2));
                                 $colorStyle = $colors[$loop->index % count($colors)];
@@ -140,19 +140,7 @@
                 </table>
             </div>
             
-            <div class="bg-white px-6 py-4 flex items-center justify-between border-t border-gray-100">
-                <div class="text-sm text-gray-500">
-                    Showing 1 to {{ count($suppliers) }} of {{ count($suppliers) }} results
-                </div>
-                <div class="flex items-center gap-2">
-                    <button class="w-8 h-8 flex items-center justify-center rounded border border-gray-300 text-gray-500 hover:bg-gray-50">
-                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
-                    </button>
-                    <button class="w-8 h-8 flex items-center justify-center rounded border border-gray-300 text-gray-500 hover:bg-gray-50">
-                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-                    </button>
-                </div>
-            </div>
+            <x-pagination :paginator="$suppliers" />
         </div>
 
         <!-- Supplier Modal (Create/Edit) -->
