@@ -123,10 +123,10 @@
                                               ($statusDummy === 'Draft' ? 'text-yellow-700 bg-yellow-50 border border-yellow-200 dot-yellow-500' : 
                                               'text-gray-700 bg-gray-100 border border-gray-200 dot-gray-500');
                                 
-                                $plyCount = [3, 5, 7][$loop->index % 3];
-                                $thickness = [105, 175, 245][$loop->index % 3];
+                                $plyCount = $layup->clt_layers_count ?? 0;
+                                $thickness = $layup->clt_layers_sum_thickness ?? 0;
                             @endphp
-                            <tr class="hover:bg-gray-50 transition-colors relative group/row">
+                            <tr onclick="window.location='{{ route('layups.layers.index', $layup) }}'" class="hover:bg-gray-50 transition-colors relative group/row cursor-pointer">
                                 {{-- LAYUP DUMMY DATA --}}
                                 <td class="whitespace-nowrap py-[22px] pl-6 pr-3 text-sm text-gray-500 font-mono tracking-widest">
                                     L-{{ str_pad($layup->id, 3, '0', STR_PAD_LEFT) }}-A
@@ -135,13 +135,13 @@
                                     {{ $layup->name }}
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-[22px] text-[14px] text-gray-500">
-                                    {{ $thickness }}mm
+                                    {{ rtrim(rtrim(number_format((float)$thickness, 2), '0'), '.') }}mm
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-[22px]">
                                     <span class="inline-flex items-center justify-center rounded bg-gray-100 px-2.5 py-1 text-xs font-bold text-gray-600 tracking-wide">{{ $plyCount }}</span>
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-[22px] text-[14px] text-gray-500">
-                                    Spruce / No. {{ [1, 2, 'Select'][$loop->index % 3] }}
+                                    Spruce / Mixed
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-[22px] text-[14px] text-gray-400">
                                     Rev {{ ($loop->index % 4) + 1 }} (Oct 10)

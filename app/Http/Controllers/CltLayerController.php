@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\CltLayer;
 use App\Models\CltLayup;
+use App\Http\Requests\CltLayerRequest;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Illuminate\View\View;
 
 class CltLayerController extends Controller
@@ -15,56 +17,31 @@ class CltLayerController extends Controller
     public function index(Request $request, CltLayup $layup): View
     {
         $query = $layup->cltLayers();
-        // Layer biasanya tidak disearch pakai nama, tapi mungkin di sort
         $layers = $query->orderBy('layer_order')->paginate(10)->withQueryString();
         return view('cltlayers.index', compact('layup', 'layers'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function store(CltLayerRequest $request, CltLayup $layup): RedirectResponse
     {
-        //
+        $layup->cltLayers()->create($request->validated());
+
+        return redirect()->route('layups.layers.index', $layup)
+            ->with('success', 'CLT Layer berhasil ditambahkan.');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function update(CltLayerRequest $request, CltLayup $layup, CltLayer $layer): RedirectResponse
     {
-        //
+        $layer->update($request->validated());
+
+        return redirect()->route('layups.layers.index', $layup)
+            ->with('success', 'CLT Layer berhasil diperbarui.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(CltLayer $cltLayer)
+    public function destroy(CltLayup $layup, CltLayer $layer): RedirectResponse
     {
-        //
-    }
+        $layer->delete();
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(CltLayer $cltLayer)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, CltLayer $cltLayer)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(CltLayer $cltLayer)
-    {
-        //
+        return redirect()->route('layups.layers.index', $layup)
+            ->with('success', 'CLT Layer berhasil dihapus.');
     }
 }

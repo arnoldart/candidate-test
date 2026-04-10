@@ -16,7 +16,7 @@ class CltLayupController extends Controller
      */
     public function index(Request $request, Supplier $supplier): View
     {
-        $query = $supplier->cltLayups();
+        $query = $supplier->cltLayups()->withCount('cltLayers')->withSum('cltLayers', 'thickness');
 
         if ($request->has('search') && $request->search != '') {
             $query->where('name', 'like', '%' . $request->search . '%');
@@ -41,7 +41,7 @@ class CltLayupController extends Controller
      public function store(CltLayupRequest $request, Supplier $supplier): RedirectResponse
     {
         $supplier->cltLayups()->create($request->validated());
-        return redirect()->route('suppliers.layups.index', $supplier)
+        return redirect()->route('layups.layers.index', $supplier->cltLayups()->latest('id')->first())
             ->with('success', 'CLT Layup berhasil ditambahkan.');
     }
 

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CltLayerController;
 use App\Http\Controllers\CltLayupController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SupplierController;
@@ -20,6 +21,7 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('suppliers', SupplierController::class)->except(['show', 'create', 'edit']);
     Route::resource('suppliers.layups', CltLayupController::class)->except(['show', 'create', 'edit']);
+    Route::resource('layups.layers', CltLayerController::class)->except(['show', 'create', 'edit']);
 });
 
 require __DIR__.'/auth.php';
