@@ -15,22 +15,12 @@ class SupplierController extends Controller
         return view('suppliers.index', compact('suppliers'));
     }
 
-    public function create(): View
-    {
-        return view('suppliers.create');
-    }
-
     public function store(SupplierRequest $request): RedirectResponse
     {
         Supplier::create($request->validated());
 
         return redirect()->route('suppliers.index')
             ->with('success', 'Supplier berhasil dibuat.');
-    }
-
-    public function edit(Supplier $supplier): View
-    {
-        return view('suppliers.edit', compact('supplier'));
     }
 
     public function update(SupplierRequest $request, Supplier $supplier): RedirectResponse
