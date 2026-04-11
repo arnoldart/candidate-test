@@ -74,7 +74,7 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-50">
-                                @foreach(\App\Models\Supplier::withCount('cltLayups')->latest()->take(5)->get() as $s)
+                                @foreach(\App\Models\Supplier::withCount('cltLayups')->orderByDesc('last_audit_date')->take(5)->get() as $s)
                                 <tr class="hover:bg-gray-50 transition-colors">
                                     <td class="whitespace-nowrap py-3.5 pl-6 pr-3 text-sm font-medium text-gray-900">{{ $s->name }}</td>
                                     <td class="whitespace-nowrap px-3 py-3.5 text-sm text-gray-500">{{ $s->location ?: '-' }}</td>
