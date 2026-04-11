@@ -63,6 +63,8 @@
             showLayupModal: false, 
             showImportModal: false,
             showConflictModal: false,
+            showToast: false,
+            toastStats: null,
             conflictState: {
                 conflicts: [],
                 currentIndex: 0,
@@ -72,6 +74,14 @@
             layupName: '', 
             formAction: '{{ route('suppliers.layups.store', $supplier) }}',
             init() {
+                let savedToast = sessionStorage.getItem('import_stats_toast');
+                if (savedToast) {
+                    this.toastStats = JSON.parse(savedToast);
+                    this.showToast = true;
+                    sessionStorage.removeItem('import_stats_toast');
+                    setTimeout(() => this.showToast = false, 6000);
+                }
+
                 @if($errors->any())
                     this.showLayupModal = true;
                     this.layupName = '{{ old('name') }}';
@@ -147,6 +157,7 @@
                 this.showImportModal = true;
                 this.importState.isProcessing = true;
                 this.importState.results = null;
+                this.importState.dryRun = false;
 
                 const formData = new FormData();
                 formData.append('file', this.importState.file);
@@ -173,12 +184,16 @@
                     };
                     
                     if (this.importState.results.success) {
-                        setTimeout(() => window.location.reload(), 2000);
+                        sessionStorage.setItem('import_stats_toast', JSON.stringify(result.stats));
+                        window.location.reload();
                     }
                 } catch(err) {
                     this.importState.results = { success: false, message: 'A server error occurred during resolved import.' };
+                    this.showImportModal = true;
                 } finally {
-                    this.importState.isProcessing = false;
+                    if (!(this.importState.results?.success)) {
+                        this.importState.isProcessing = false;
+                    }
                 }
             },
             async uploadData() {
@@ -220,12 +235,15 @@
                     };
                     
                     if (this.importState.results.success && !this.importState.dryRun) {
-                        setTimeout(() => window.location.reload(), 2000);
+                        sessionStorage.setItem('import_stats_toast', JSON.stringify(result.stats));
+                        window.location.reload();
                     }
                 } catch(err) {
                     this.importState.results = { success: false, message: 'A server error occurred during import.' };
                 } finally {
-                    this.importState.isProcessing = false;
+                    if (!(this.importState.results?.success && !this.importState.dryRun)) {
+                        this.importState.isProcessing = false;
+                    }
                 }
             }
         }">
@@ -378,5 +396,51 @@
         @include('cltlayups.import-modal')
 
         @include('cltlayups.conflict-modal')
+
+        <!-- Toast Notification -->
+        <div x-show="showToast" 
+             x-transition:enter="transform ease-out duration-300 transition" 
+             x-transition:enter-start="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2" 
+             x-transition:enter-end="translate-y-0 opacity-100 sm:translate-x-0" 
+             x-transition:leave="transition ease-in duration-100" 
+             x-transition:leave-start="opacity-100" 
+             x-transition:leave-end="opacity-0" 
+             class="pointer-events-none fixed inset-0 flex items-end px-4 py-6 sm:items-start sm:p-6 z-[100]" style="display: none;">
+            <div class="flex w-full flex-col items-center space-y-4 sm:items-end">
+                <div class="pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5">
+                    <div class="p-4">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <i class="fa-solid fa-circle-check text-green-400 text-xl mt-0.5"></i>
+                            </div>
+                            <div class="ml-3 w-0 flex-1 pt-0.5">
+                                <p class="text-sm font-bold text-gray-900">Import Completed Successfully!</p>
+                                <div class="mt-1 text-[13px] text-gray-500 rounded bg-gray-50 p-2 mt-2">
+                                    <div class="flex justify-between border-b border-gray-100 pb-1 mb-1">
+                                        <span class="font-medium">Created:</span>
+                                        <span class="font-bold text-gray-900" x-text="toastStats?.created"></span>
+                                    </div>
+                                    <div class="flex justify-between border-b border-gray-100 pb-1 mb-1">
+                                        <span class="font-medium">Updated:</span>
+                                        <span class="font-bold text-gray-900" x-text="toastStats?.updated"></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="font-medium">Skipped:</span>
+                                        <span class="font-bold text-gray-900" x-text="toastStats?.skipped"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ml-4 flex flex-shrink-0">
+                                <button type="button" @click="showToast = false" class="inline-flex rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none">
+                                    <span class="sr-only">Close</span>
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </x-app-layout>

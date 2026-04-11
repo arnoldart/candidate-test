@@ -14,7 +14,7 @@
 
                 <div class="px-6 py-6">
                     
-                    <div class="mt-2 flex justify-center rounded-lg border-2 border-dashed border-gray-300 px-6 py-10 hover:bg-gray-50 transition-colors cursor-pointer" x-data="{ isDragging: false }" @dragover.prevent="isDragging = true" @dragleave.prevent="isDragging = false" @drop.prevent="isDragging = false; handleDrop($event)" :class="{'bg-[#F0F7F4] border-[#447A60]': isDragging}">
+                    <div class="mt-2 flex justify-center rounded-lg border-2 border-dashed border-gray-300 px-6 py-10 hover:bg-gray-50 transition-colors cursor-pointer" x-data="{ isDragging: false }" @click="$refs.fileInput.click()" @dragover.prevent="isDragging = true" @dragleave.prevent="isDragging = false" @drop.prevent="isDragging = false; handleDrop($event)" :class="{'bg-[#F0F7F4] border-[#447A60]': isDragging}">
                         <div class="text-center">
                             <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-white border border-gray-100 shadow-sm mb-4">
                                 <i class="fa-solid fa-cloud-arrow-up text-[#447A60] text-xl"></i>
@@ -22,7 +22,7 @@
                             <div class="mt-2 text-sm leading-6 text-gray-600">
                                 <label for="file-upload" class="relative cursor-pointer rounded-md font-semibold text-[#447A60] focus-within:outline-none focus-within:ring-2 focus-within:ring-[#447A60] focus-within:ring-offset-2 hover:text-[#36614D]">
                                     <span>Click to upload</span>
-                                    <input id="file-upload" name="file-upload" type="file" accept=".json,.csv" class="sr-only" @change="handleFileSelect">
+                                    <input id="file-upload" x-ref="fileInput" name="file-upload" type="file" accept=".json,.csv" class="sr-only" @change="handleFileSelect">
                                 </label>
                                 <span class="pl-1">or drag and drop</span>
                             </div>
@@ -57,7 +57,7 @@
                         </div>
                     </div>
 
-                    <div class="mt-5 rounded-lg p-4 flex gap-3" x-show="importState.results && importState.results.success && !importState.results.stats?.conflicts_detected" x-transition :class="importState.results?.success ? 'bg-[#F0FDF4] border border-[#DCFCE7]' : 'bg-[#FEF2F2] border border-[#FEE2E2]'">
+                    <div class="mt-5 rounded-lg p-4 flex gap-3" x-show="importState.results && importState.results.success && (!importState.dryRun || !importState.results.stats?.conflicts_detected)" x-transition :class="importState.results?.success ? 'bg-[#F0FDF4] border border-[#DCFCE7]' : 'bg-[#FEF2F2] border border-[#FEE2E2]'">
                         <div class="flex-shrink-0 mt-0.5" x-show="!importState.results?.success">
                             <i class="fa-solid fa-circle-xmark text-[#EF4444]"></i>
                         </div>
@@ -67,17 +67,17 @@
                         <div class="w-full">
                             <h3 class="text-sm font-bold" :class="importState.results?.success ? 'text-[#166534]' : 'text-[#B91C1C]'" x-text="importState.results?.message"></h3>
                             
-                            <div class="mt-2 text-[12px] flex flex-col gap-1" :class="importState.results?.success ? 'text-[#166534]' : 'text-[#DC2626]'" x-show="importState.results?.stats && importState.results.success">
+                            {{-- <div class="mt-2 text-[12px] flex flex-col gap-1" :class="importState.results?.success ? 'text-[#166534]' : 'text-[#DC2626]'" x-show="importState.results?.stats && importState.results.success">
                                 <div class="grid grid-cols-3 gap-2 mt-1 bg-white/50 p-2 rounded">
                                     <div><span class="font-bold">Created:</span> <span x-text="importState.results?.stats?.created"></span></div>
                                     <div><span class="font-bold">Updated:</span> <span x-text="importState.results?.stats?.updated"></span></div>
                                     <div><span class="font-bold">Skipped:</span> <span x-text="importState.results?.stats?.skipped"></span></div>
                                 </div>
-                            </div>
+                            </div> --}}
                         </div>
                     </div>
 
-                    <div class="mt-5 rounded-lg bg-[#FEF2F2] border border-[#FEE2E2] p-4 flex gap-3" x-show="importState.results?.stats?.conflicts_detected > 0" x-transition>
+                    <div class="mt-5 rounded-lg bg-[#FEF2F2] border border-[#FEE2E2] p-4 flex gap-3" x-show="importState.results?.stats?.conflicts_detected > 0 && importState.dryRun" x-transition>
                         <div class="flex-shrink-0 mt-0.5">
                             <i class="fa-solid fa-triangle-exclamation text-[#B91C1C] text-lg"></i>
                         </div>

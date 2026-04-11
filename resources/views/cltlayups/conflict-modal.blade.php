@@ -48,21 +48,23 @@
 
                             <div class="flex flex-col gap-2">
                                 <template x-for="(conflict, index) in conflictState.conflicts" :key="conflict.layup_name">
-                                    <div @click="conflictState.currentIndex = index" class="p-3 rounded-lg border cursor-pointer hover:shadow-sm transition-colors relative"
-                                         :class="conflictState.currentIndex === index 
-                                             ? 'bg-[#F0F7F4] border-[#447A60]' 
-                                             : (conflictState.resolutions[conflict.layup_name] 
-                                                  ? 'bg-white border-gray-200 opacity-60' 
-                                                  : 'bg-white border-gray-200')">
+                                    <div class="w-full text-left px-5 py-4 border-b border-gray-100 hover:bg-white transition-colors cursor-pointer group" 
+                                         :class="conflictState.currentIndex === index ? 'bg-white border-l-4 border-l-[#447A60]' : 'border-l-4 border-l-transparent'"
+                                         @click="conflictState.currentIndex = index">
                                         
                                         <div class="flex justify-between items-start">
-                                            <div class="font-bold text-sm text-gray-900" :class="conflictState.resolutions[conflict.layup_name] ? 'line-through text-gray-500' : ''" x-text="conflict.layup_name"></div>
+                                            <div class="font-bold text-sm text-gray-900" :class="conflictState.resolutions[conflict.layup_name] ? 'line-through text-gray-400' : ''" x-text="conflict.layup_name"></div>
                                             <div>
                                                 <i x-show="conflictState.resolutions[conflict.layup_name]" class="fa-regular fa-circle-check text-[#22C55E]"></i>
                                                 <div x-show="!conflictState.resolutions[conflict.layup_name]" class="w-2 h-2 rounded-full bg-red-600 mt-1"></div>
                                             </div>
                                         </div>
-                                        <div class="text-xs text-gray-500 mt-1" x-text="conflictState.resolutions[conflict.layup_name] ? 'Resolved' : 'Discrepancies found'"></div>
+                                        <div class="text-[12px] mt-1 font-medium flex items-center gap-1.5" 
+                                             :class="!conflictState.resolutions[conflict.layup_name] ? 'text-gray-500' : (conflictState.resolutions[conflict.layup_name] === 'skip' ? 'text-gray-500' : 'text-[#447A60]')">
+                                            <i x-show="conflictState.resolutions[conflict.layup_name] === 'skip'" class="fa-solid fa-rotate-left text-[10px]"></i>
+                                            <i x-show="conflictState.resolutions[conflict.layup_name] === 'overwrite'" class="fa-solid fa-check text-[10px]"></i>
+                                            <span x-text="!conflictState.resolutions[conflict.layup_name] ? 'Discrepancies found' : (conflictState.resolutions[conflict.layup_name] === 'skip' ? 'Keeping Existing' : 'Accepting New')"></span>
+                                        </div>
                                     </div>
                                 </template>
                             </div>
