@@ -21,6 +21,7 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('suppliers', SupplierController::class)->except(['show', 'create', 'edit']);
     Route::resource('suppliers.layups', CltLayupController::class)->except(['show', 'create', 'edit']);
+    Route::post('layups/{layup}/layers/sync', [CltLayerController::class, 'sync'])->name('layups.layers.sync');
     Route::resource('layups.layers', CltLayerController::class)->except(['show', 'create', 'edit']);
 });
 

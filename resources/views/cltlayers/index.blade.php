@@ -1,6 +1,9 @@
 <x-app-layout>
+    <!-- Include SortableJS via JSdelivr -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+
     <x-slot name="header">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div class="flex items-center gap-2 text-sm text-gray-500">
                 <a href="{{ route('dashboard') }}" class="hover:text-gray-900 transition-colors">Home</a>
                 <span class="text-gray-400">›</span>
@@ -16,14 +19,73 @@
                     <svg class="mr-2.5 h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" /></svg>
                     Duplicate
                 </button>
-                <button type="button" class="inline-flex items-center justify-center rounded-md bg-[#447A60] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#36614D] transition-colors focus:outline-none focus:ring-2 focus:ring-[#447A60] focus:ring-offset-2">
+                <button type="submit" form="sync-form" class="inline-flex items-center justify-center rounded-md bg-[#447A60] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#36614D] transition-colors focus:outline-none focus:ring-2 focus:ring-[#447A60] focus:ring-offset-2">
                     <svg class="mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>
                     Save Changes
                 </button>
             </div>
         </div>
+    </x-slot>
 
-        <div class="bg-white px-8 py-6 rounded-xl border border-gray-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <!-- Wrap everything in the Alpine state and Form -->
+    <form id="sync-form" action="{{ route('layups.layers.sync', $layup) }}" method="POST" class="max-w-7xl mx-auto pb-12 pt-6" x-data="{ 
+        showLayerModal: false, 
+        isEdit: false,
+        editIndex: null,
+        thickness: '40', 
+        width: '1200', 
+        angle: '0', 
+        layers: {{ json_encode($layers->map(fn($l) => ['thickness' => rtrim(rtrim($l->thickness, '0'), '.'), 'width' => rtrim(rtrim($l->width, '0'), '.'), 'angle' => rtrim(rtrim($l->angle, '0'), '.')])->toArray()) }},
+        init() {
+            this.$nextTick(() => {
+                new Sortable(document.getElementById('layers-tbody'), {
+                    animation: 150,
+                    handle: '.cursor-grab',
+                    ghostClass: 'bg-green-50',
+                    onEnd: (evt) => {
+                        const item = this.layers.splice(evt.oldIndex, 1)[0];
+                        this.layers.splice(evt.newIndex, 0, item);
+                    }
+                });
+            });
+        },
+        saveLayer() {
+            if (this.isEdit && this.editIndex !== null) {
+                this.layers[this.editIndex].thickness = parseFloat(this.thickness) || 0;
+                this.layers[this.editIndex].width = parseFloat(this.width) || 0;
+                this.layers[this.editIndex].angle = this.angle.toString();
+            } else {
+                this.layers.push({
+                    thickness: parseFloat(this.thickness) || 0,
+                    width: parseFloat(this.width) || 0,
+                    angle: this.angle.toString()
+                });
+            }
+            this.showLayerModal = false;
+        },
+        deleteLayer(index) {
+            this.layers.splice(index, 1);
+        },
+        get totalThickness() {
+            return this.layers.reduce((sum, layer) => sum + parseFloat(layer.thickness || 0), 0);
+        },
+        get totalLayers() {
+            return this.layers.length;
+        }
+    }">
+        @csrf
+        
+        <!-- Hidden Inputs array mapped to Alpine layers -->
+        <template x-for="(layer, index) in layers">
+            <div>
+                <input type="hidden" :name="'layers['+index+'][thickness]'" :value="layer.thickness">
+                <input type="hidden" :name="'layers['+index+'][width]'" :value="layer.width">
+                <input type="hidden" :name="'layers['+index+'][angle]'" :value="layer.angle">
+            </div>
+        </template>
+
+        <!-- Specification Card (Moved here to be within scope) -->
+        <div class="bg-white px-8 py-6 rounded-xl border border-gray-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
             <div>
                 <div class="flex items-center gap-4">
                     <h1 class="text-[28px] text-gray-900 tracking-tight font-bold" style="font-family: 'Merriweather', serif;">
@@ -45,35 +107,30 @@
                     <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Last Modified</span>
                     <span class="block text-sm font-semibold text-gray-900">{{ $layup->updated_at->format('M d, Y') }}</span>
                 </div>
-                @php
-                    $totalThickness = collect($layers->items())->sum('thickness');
-                    $totalLayers = $layers->total();
-                @endphp
                 <div>
                     <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Total Thickness</span>
-                    <span class="block text-lg font-bold text-[#447A60] leading-none">{{ $totalThickness }}mm</span>
+                    <span class="block text-lg font-bold text-[#447A60] leading-none"><span x-text="totalThickness.toFixed(2)"></span>mm</span>
                 </div>
                 <div>
                     <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Total Layers</span>
-                    <span class="block text-lg font-bold text-[#447A60] leading-none">{{ $totalLayers }} Layers</span>
+                    <span class="block text-lg font-bold text-[#447A60] leading-none"><span x-text="totalLayers"></span> Layers</span>
                 </div>
             </div>
         </div>
-    </x-slot>
 
-    <div class="max-w-7xl mx-auto pb-12" x-data="{ showLayerModal: false, isEdit: false, layerOrder: '', thickness: '', width: '', angle: '', formAction: '{{ route('layups.layers.store', $layup) }}' }">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             
+            <!-- LEFT COLUMN: Table & Note (7 cols) -->
             <div class="lg:col-span-7 flex flex-col min-w-0">
-                
                 <div class="flex justify-between items-center mb-4 px-1">
                     <h2 class="text-xl font-bold text-gray-900" style="font-family: 'Merriweather', serif;">Layer Composition</h2>
-                    <button type="button" @click="isEdit = false; layerOrder='1'; thickness='40'; width='1200'; angle='0'; formAction='{{ route('layups.layers.store', $layup) }}'; showLayerModal=true;" class="inline-flex items-center text-sm font-semibold text-[#447A60] hover:text-[#36614D] transition-colors focus:outline-none">
+                    <button type="button" @click="isEdit = false; editIndex=null; thickness='40'; width='1200'; angle='0'; showLayerModal=true;" class="inline-flex items-center text-sm font-semibold text-[#447A60] hover:text-[#36614D] transition-colors focus:outline-none">
                         <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
                         Add Layer
                     </button>
                 </div>
 
+                <!-- Table Box -->
                 <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden flex-grow flex flex-col">
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
@@ -87,64 +144,64 @@
                                     <th scope="col" class="px-5 py-3 text-right text-[11px] font-bold text-gray-400 tracking-widest uppercase">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-100 bg-white">
-                                @if($layers->isEmpty())
+                            <tbody id="layers-tbody" class="divide-y divide-gray-100 bg-white">
+                                <template x-if="layers.length === 0">
                                     <tr>
                                         <td colspan="6" class="px-5 py-8 text-center text-sm text-gray-500">
                                             No layers have been compositioned yet. Click "Add Layer" to begin constructing your layup.
                                         </td>
                                     </tr>
-                                @else
-                                    @foreach($layers as $layer)
-                                        <tr class="hover:bg-gray-50 transition-colors group">
-                                            <td class="py-3.5 pl-6 whitespace-nowrap">
-                                                <div class="flex items-center justify-center w-6 h-6 rounded bg-gray-100 text-gray-400 cursor-grab hover:bg-gray-200">
-                                                    <span class="text-xs font-bold">{{ $layer->layer_order }}</span>
-                                                </div>
-                                            </td>
-                                            <td class="px-4 py-3.5 whitespace-nowrap text-sm font-medium text-gray-700 font-mono">{{ rtrim(rtrim($layer->thickness, '0'), '.') }}mm</td>
-                                            <td class="px-4 py-3.5 whitespace-nowrap text-sm text-gray-500 font-mono">{{ rtrim(rtrim($layer->width, '0'), '.') }}mm</td>
-                                            <td class="px-4 py-3.5 whitespace-nowrap">
-                                                @if($layer->angle == 0)
-                                                    <span class="inline-flex items-center rounded-full bg-gray-100 border border-gray-200 px-2 py-0.5 text-xs font-semibold text-gray-600">
-                                                        <svg class="mr-1 h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
-                                                        0°
-                                                    </span>
-                                                @else
-                                                    <span class="inline-flex items-center rounded-full bg-orange-50 border border-orange-200 px-2 py-0.5 text-xs font-semibold text-[#B36B39]">
-                                                        <svg class="mr-1 h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-                                                        90°
-                                                    </span>
-                                                @endif
-                                            </td>
-                                            <td class="px-4 py-3.5 whitespace-nowrap">
-                                                <span class="inline-flex items-center text-xs font-medium text-gray-700">
-                                                    <span class="mr-1.5 h-2 w-2 rounded-full {{ $layer->angle == 0 ? 'bg-[#447A60]' : 'bg-[#B36B39]' }}"></span> 
-                                                    {{ $layer->angle == 0 ? 'C24' : 'C16' }}
+                                </template>
+                                <template x-for="(layer, index) in layers" :key="index">
+                                    <tr class="hover:bg-gray-50 transition-colors group">
+                                        <td class="py-3.5 pl-6 whitespace-nowrap">
+                                            <div class="flex items-center justify-center w-6 h-6 rounded bg-gray-100 text-gray-400 cursor-grab hover:bg-gray-200">
+                                                <svg class="w-3.5 h-3.5 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 10 16"><path d="M3 1a1 1 0 1 1-2 0 1 1 0 0 1 2 0Zm4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0Zm-4 7a1 1 0 1 1-2 0 1 1 0 0 1 2 0Zm4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0Zm-4 7a1 1 0 1 1-2 0 1 1 0 0 1 2 0Zm4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"/></svg>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-3.5 whitespace-nowrap text-sm font-medium text-gray-700 font-mono" x-text="layer.thickness + 'mm'"></td>
+                                        <td class="px-4 py-3.5 whitespace-nowrap text-sm text-gray-500 font-mono" x-text="layer.width + 'mm'"></td>
+                                        <td class="px-4 py-3.5 whitespace-nowrap">
+                                            <!-- Conditional Rendering based on angle -->
+                                            <template x-if="layer.angle.toString() === '0'">
+                                                <span class="inline-flex items-center rounded-full bg-gray-100 border border-gray-200 px-2 py-0.5 text-xs font-semibold text-gray-600">
+                                                    <svg class="mr-1 h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
+                                                    0°
                                                 </span>
-                                            </td>
-                                            <td class="px-5 py-3.5 whitespace-nowrap text-right">
-                                                <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <button type="button" @click="isEdit = true; layerOrder='{{ $layer->layer_order }}'; thickness='{{ rtrim(rtrim($layer->thickness, '0'), '.') }}'; width='{{ rtrim(rtrim($layer->width, '0'), '.') }}'; angle='{{ rtrim(rtrim($layer->angle, '0'), '.') }}'; formAction='{{ route('layups.layers.update', ['layup' => $layup->id, 'layer' => $layer->id]) }}'; showLayerModal=true;" class="text-gray-400 hover:text-blue-600"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button>
-                                                    <form action="{{ route('layups.layers.destroy', ['layup' => $layup->id, 'layer' => $layer->id]) }}" method="POST" class="inline" onsubmit="return confirm('Delete this layer?');">
-                                                        @csrf @method('DELETE')
-                                                        <button type="submit" class="text-gray-400 hover:text-red-600"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
-                                                    </form>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                @endif
+                                            </template>
+                                            <template x-if="layer.angle.toString() !== '0'">
+                                                <span class="inline-flex items-center rounded-full bg-orange-50 border border-orange-200 px-2 py-0.5 text-xs font-semibold text-[#B36B39]">
+                                                    <svg class="mr-1 h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                                                    90°
+                                                </span>
+                                            </template>
+                                        </td>
+                                        <td class="px-4 py-3.5 whitespace-nowrap">
+                                            <span class="inline-flex items-center text-xs font-medium text-gray-700">
+                                                <span class="mr-1.5 h-2 w-2 rounded-full" :class="layer.angle.toString() === '0' ? 'bg-[#447A60]' : 'bg-[#B36B39]'"></span> 
+                                                <span x-text="layer.angle.toString() === '0' ? 'C24' : 'C16'"></span>
+                                            </span>
+                                        </td>
+                                        <td class="px-5 py-3.5 whitespace-nowrap text-right">
+                                            <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button type="button" @click="isEdit = true; editIndex = index; thickness=layer.thickness; width=layer.width; angle=layer.angle.toString(); showLayerModal=true;" class="text-gray-400 hover:text-blue-600 focus:outline-none"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button>
+                                                <button type="button" @click="if(confirm('Remove this layer?')) deleteLayer(index)" class="text-gray-400 hover:text-red-600 focus:outline-none"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </template>
                             </tbody>
                         </table>
                     </div>
                     
+                    <!-- Table Footer Summary -->
                     <div class="bg-gray-50 border-t border-gray-200 px-5 py-3 flex justify-between items-center mt-auto">
-                        <span class="text-xs text-gray-500 font-medium">Showing {{ $totalLayers }} layers</span>
-                        <span class="text-xs text-gray-700">Calculated Sum: <strong class="font-mono text-gray-900">{{ number_format((float)$totalThickness, 2) }} mm</strong></span>
+                        <span class="text-xs text-gray-500 font-medium">Showing <span x-text="totalLayers"></span> layers</span>
+                        <span class="text-xs text-gray-700">Calculated Sum: <strong class="font-mono text-gray-900"><span x-text="totalThickness.toFixed(2)"></span> mm</strong></span>
                     </div>
                 </div>
 
+                <!-- Engineering Note -->
                 <div class="mt-6 bg-[#FAFAFA] border border-gray-200 rounded-xl p-5 flex items-start gap-3">
                     <div class="mt-0.5 flex-shrink-0 w-6 h-6 rounded-full border border-red-200 text-red-600 flex items-center justify-center font-serif italic text-sm mb-auto">i</div>
                     <div>
@@ -155,6 +212,7 @@
 
             </div>
             
+            <!-- RIGHT COLUMN: Visualizer (5 cols) -->
             <div class="lg:col-span-5 flex flex-col min-w-0">
                 <div class="flex justify-between items-center mb-4 px-1">
                     <h2 class="text-xl font-bold text-gray-900" style="font-family: 'Merriweather', serif;">Structure Visualizer</h2>
@@ -172,17 +230,30 @@
                     </div>
 
                     <div class="w-64 max-w-full mx-auto shadow-xl rounded-lg bg-white p-6 relative z-10 space-y-1 transform transition-all hover:scale-105 duration-500">
-                        @if($layers->isEmpty())
+                        <template x-if="layers.length === 0">
                             <div class="h-48 border-2 border-dashed border-gray-200 rounded-lg flex items-center justify-center text-gray-400 text-xs font-bold uppercase tracking-widest">
                                 Canvas Empty
                             </div>
-                        @else
-                            @foreach($layers as $layer)
-                                <div class="w-full rounded-md border text-xs font-bold text-gray-800 flex items-center justify-center tracking-wider transition-colors {{ $layer->angle == 0 ? 'bg-[#E3CAA5] border-[#CBB38D]' : 'bg-[#C49B74] border-[#A6815B]' }}" style="height: {{ max(30, ($layer->thickness / max(1, $totalThickness)) * 200) }}px;">
-                                    L{{ $layer->layer_order }} ({{ rtrim(rtrim($layer->thickness, '0'), '.') }}mm)
-                                </div>
-                            @endforeach
-                        @endif
+                        </template>
+                        <template x-for="(layer, index) in layers" :key="index">
+                            <div class="rounded-md border text-xs font-bold text-gray-800 flex items-center justify-center tracking-wider transition-all relative" 
+                                 :class="layer.angle.toString() === '0' ? 'bg-[#E3CAA5] border-[#CBB38D] w-full' : 'bg-[#C49B74] border-[#A6815B] w-11/12 mx-auto'" 
+                                 :style="'height: ' + Math.max(30, (parseFloat(layer.thickness) / Math.max(1, totalThickness)) * 200) + 'px; transition: height 0.3s ease;'">
+                                
+                                <span x-text="'L' + (index + 1) + ' (' + layer.thickness + 'mm)'" class="z-10"></span>
+                                
+                                <template x-if="layer.angle.toString() === '0'">
+                                    <svg class="h-4 w-4 text-gray-600 opacity-60 absolute right-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                                    </svg>
+                                </template>
+                                <template x-if="layer.angle.toString() !== '0'">
+                                    <svg class="h-4 w-4 text-gray-800 opacity-50 absolute right-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                    </svg>
+                                </template>
+                            </div>
+                        </template>
                     </div>
 
                     <div class="absolute left-0 right-0 bottom-6 text-center text-[11px] text-gray-400 mx-10 leading-tight">
@@ -193,27 +264,23 @@
             </div>
         </div>
 
+        <!-- Layer Modal -->
         <div x-show="showLayerModal" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true" style="display: none;">
             <div x-show="showLayerModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="showLayerModal = false"></div>
             <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
                 <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
                     <div x-show="showLayerModal" class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md">
-                        <form :action="formAction" method="POST">
-                            @csrf
-                            <input type="hidden" name="_method" value="PUT" x-bind:disabled="!isEdit">
-                            
+                        <!-- Pseudo-Form to trigger HTML5 validation on enter but handled by Alpine -->
+                        <div class="block" @keydown.enter.prevent="saveLayer()">
                             <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                                 <h3 class="text-lg font-semibold leading-6 text-gray-900 mb-4" id="modal-title" x-text="isEdit ? 'Edit Layer' : 'Add New Layer'"></h3>
                                 
                                 <div class="space-y-4">
                                     <div class="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Order Index</label>
-                                            <input type="number" name="layer_order" x-model="layerOrder" class="block w-full rounded-md border-0 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-[#447A60] sm:text-sm" required>
-                                        </div>
-                                        <div>
+                                         <!-- Removed Order Index entirely -->
+                                        <div class="col-span-2">
                                             <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Angle (Deg)</label>
-                                            <select name="angle" x-model="angle" class="block w-full rounded-md border-0 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-[#447A60] sm:text-sm">
+                                            <select x-model="angle" class="block w-full rounded-md border-0 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-[#447A60] sm:text-sm">
                                                 <option value="0">0° (Longitudinal)</option>
                                                 <option value="90">90° (Transverse)</option>
                                             </select>
@@ -223,31 +290,27 @@
                                     <div class="grid grid-cols-2 gap-4">
                                         <div>
                                             <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Thickness (mm)</label>
-                                            <input type="number" step="0.01" name="thickness" x-model="thickness" class="block w-full rounded-md border-0 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-[#447A60] sm:text-sm" required>
+                                            <input type="number" step="0.01" x-model="thickness" class="block w-full rounded-md border-0 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-[#447A60] sm:text-sm" required>
                                         </div>
                                         <div>
                                             <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Width (mm)</label>
-                                            <input type="number" step="0.01" name="width" x-model="width" class="block w-full rounded-md border-0 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-[#447A60] sm:text-sm" required>
+                                            <input type="number" step="0.01" x-model="width" class="block w-full rounded-md border-0 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-[#447A60] sm:text-sm" required>
                                         </div>
                                     </div>
-                                    
-                                    @if($errors->any())
-                                        <div class="text-sm text-red-600 mt-2">Please check your inputs, validation failed.</div>
-                                    @endif
                                 </div>
                             </div>
                             <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
-                                <button type="submit" class="inline-flex w-full justify-center rounded-md bg-[#447A60] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#36614D] sm:ml-3 sm:w-auto transition-colors">
-                                    <span x-text="isEdit ? 'Save Changes' : 'Create Layer'"></span>
+                                <button type="button" @click="saveLayer()" class="inline-flex w-full justify-center rounded-md bg-[#447A60] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#36614D] sm:ml-3 sm:w-auto transition-colors">
+                                    <span x-text="isEdit ? 'Save Changes' : 'Draft Layer'"></span>
                                 </button>
                                 <button type="button" @click="showLayerModal = false" class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto transition-colors">
                                     Cancel
                                 </button>
                             </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </form>
 </x-app-layout>

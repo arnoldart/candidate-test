@@ -17,7 +17,7 @@ class CltLayerController extends Controller
     public function index(Request $request, CltLayup $layup): View
     {
         $query = $layup->cltLayers();
-        $layers = $query->orderBy('layer_order')->paginate(10)->withQueryString();
+        $layers = $query->orderBy('layer_order')->get();
         return view('cltlayers.index', compact('layup', 'layers'));
     }
 
@@ -37,11 +37,33 @@ class CltLayerController extends Controller
             ->with('success', 'CLT Layer berhasil diperbarui.');
     }
 
-    public function destroy(CltLayup $layup, CltLayer $layer): RedirectResponse
+    public function sync(Request $request, CltLayup $layup): RedirectResponse
     {
-        $layer->delete();
+        $request->validate([
+            'layers' => 'nullable|array',
+            'layers.*.thickness' => 'required|numeric|min:0',
+            'layers.*.width' => 'required|numeric|min:0',
+            'layers.*.angle' => 'required|numeric',
+        ]);
+
+        // Delete previous layers
+        $layup->cltLayers()->delete();
+
+        // Create new layers efficiently
+        if ($request->has('layers')) {
+            $layersData = [];
+            foreach ($request->layers as $index => $layer) {
+                $layersData[] = [
+                    'layer_order' => $index + 1,
+                    'thickness' => $layer['thickness'],
+                    'width' => $layer['width'],
+                    'angle' => $layer['angle'],
+                ];
+            }
+            $layup->cltLayers()->createMany($layersData);
+        }
 
         return redirect()->route('layups.layers.index', $layup)
-            ->with('success', 'CLT Layer berhasil dihapus.');
+            ->with('success', 'Layer composition saved successfully.');
     }
 }
