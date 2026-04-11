@@ -1,3 +1,6 @@
+@php
+    use Carbon\Carbon;
+@endphp
 <x-app-layout>
     <x-slot name="header">
         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between" x-data>
@@ -135,7 +138,7 @@
                                         <a href="{{ route('suppliers.export', $supplier) }}" class="inline-flex items-center justify-center w-8 h-8 rounded border border-gray-200 bg-white text-gray-500 hover:text-[#447A60] hover:border-[#447A60] hover:bg-[#F0F7F4] transition-colors focus:outline-none" title="Export">
                                             <i class="fa-solid fa-file-export"></i>
                                         </a>
-                                        <button type="button" @click.stop="$dispatch('open-supplier-modal', { isEdit: true, id: {{ $supplier->id }}, name: '{{ addslashes($supplier->name) }}', primary_contact: '{{ addslashes($supplier->primary_contact ?? '') }}', location: '{{ addslashes($supplier->location ?? '') }}', material_certifications: '{{ addslashes($supplier->material_certifications ?? '') }}', last_audit_date: '{{ $supplier->last_audit_date ? \Carbon\Carbon::parse($supplier->last_audit_date)->format('Y-m-d') : '' }}' })" class="inline-flex items-center justify-center w-8 h-8 rounded border border-gray-200 bg-white text-gray-500 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-colors focus:outline-none" title="Edit">
+                                        <button type="button" @click.stop="$dispatch('open-supplier-modal', { isEdit: true, id: {{ $supplier->id }}, name: '{{ addslashes($supplier->name) }}', primary_contact: '{{ addslashes($supplier->primary_contact ?? '') }}', location: '{{ addslashes($supplier->location ?? '') }}', material_certifications: '{{ addslashes($supplier->material_certifications ?? '') }}', last_audit_date: '{{ $supplier->last_audit_date ? Carbon::parse($supplier->last_audit_date)->format('Y-m-d') : '' }}' })" class="inline-flex items-center justify-center w-8 h-8 rounded border border-gray-200 bg-white text-gray-500 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-colors focus:outline-none" title="Edit">
                                             <i class="fa-solid fa-pen-to-square"></i>
                                         </button>
                                         <form action="{{ route('suppliers.destroy', $supplier) }}" method="POST" class="inline" onsubmit="return confirm('Delete this supplier?');" @click.stop>

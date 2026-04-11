@@ -1,3 +1,6 @@
+@php
+    use Carbon\Carbon;
+@endphp
 <x-app-layout>
     <x-slot name="header">
         <div x-data>
@@ -21,7 +24,7 @@
                 </div>
                 
                 <div class="flex items-center">
-                    <button type="button" @click="$dispatch('open-supplier-modal', { isEdit: true, id: {{ $supplier->id }}, name: '{{ addslashes($supplier->name) }}', primary_contact: '{{ addslashes($supplier->primary_contact ?? '') }}', location: '{{ addslashes($supplier->location ?? '') }}', material_certifications: '{{ addslashes($supplier->material_certifications ?? '') }}', last_audit_date: '{{ $supplier->last_audit_date ? \Carbon\Carbon::parse($supplier->last_audit_date)->format('Y-m-d') : '' }}' })" class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-colors">
+                    <button type="button" @click="$dispatch('open-supplier-modal', { isEdit: true, id: {{ $supplier->id }}, name: '{{ addslashes($supplier->name) }}', primary_contact: '{{ addslashes($supplier->primary_contact ?? '') }}', location: '{{ addslashes($supplier->location ?? '') }}', material_certifications: '{{ addslashes($supplier->material_certifications ?? '') }}', last_audit_date: '{{ $supplier->last_audit_date ? Carbon::parse($supplier->last_audit_date)->format('Y-m-d') : '' }}' })" class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-colors">
                         <i class="fa-solid fa-pen-to-square mr-2 text-gray-500"></i>
                         Edit Supplier
                     </button>
@@ -54,7 +57,7 @@
                 <dt class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Last Audit Date</dt>
                 <dd class="flex items-center text-[15px] font-medium text-gray-700">
                     <i class="fa-solid fa-calendar-check mr-2 text-[#447A60] text-lg"></i>
-                    {{ $supplier->last_audit_date ? \Carbon\Carbon::parse($supplier->last_audit_date)->format('M d, Y') : '-' }}
+                    {{ $supplier->last_audit_date ? Carbon::parse($supplier->last_audit_date)->format('M d, Y') : '-' }}
                 </dd>
             </div>
         </div>
@@ -83,7 +86,7 @@
             supplierContactEdit: '{{ addslashes($supplier->primary_contact ?? '') }}',
             supplierLocationEdit: '{{ addslashes($supplier->location ?? '') }}',
             supplierCertsEdit: '{{ addslashes($supplier->material_certifications ?? '') }}',
-            supplierAuditEdit: '{{ $supplier->last_audit_date ? \Carbon\Carbon::parse($supplier->last_audit_date)->format('Y-m-d') : '' }}',
+            supplierAuditEdit: '{{ $supplier->last_audit_date ? Carbon::parse($supplier->last_audit_date)->format('Y-m-d') : '' }}',
             formAction: '{{ route('suppliers.layups.store', $supplier) }}',
             init() {
                 let savedToast = sessionStorage.getItem('import_stats_toast');

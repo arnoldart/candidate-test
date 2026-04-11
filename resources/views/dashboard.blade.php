@@ -1,3 +1,10 @@
+@php
+    use App\Models\Supplier;
+    use App\Models\CltLayup;
+    use App\Models\CltLayer;
+    use Carbon\Carbon;
+@endphp
+
 <x-app-layout>
     <x-slot name="header">
         <h2 class="text-2xl text-gray-900 leading-tight" style="font-family: 'Merriweather', serif; font-weight: 700;">
@@ -16,7 +23,7 @@
                         </div>
                         <div>
                             <p class="text-[11px] text-gray-500 font-medium uppercase tracking-widest">Suppliers</p>
-                            <p class="text-2xl font-bold text-gray-900 mt-0.5">{{ \App\Models\Supplier::count() }}</p>
+                            <p class="text-2xl font-bold text-gray-900 mt-0.5">{{ Supplier::count() }}</p>
                         </div>
                     </div>
                 </div>
@@ -28,7 +35,7 @@
                         </div>
                         <div>
                             <p class="text-[11px] text-gray-500 font-medium uppercase tracking-widest">CLT Layups</p>
-                            <p class="text-2xl font-bold text-gray-900 mt-0.5">{{ \App\Models\CltLayup::count() }}</p>
+                            <p class="text-2xl font-bold text-gray-900 mt-0.5">{{ CltLayup::count() }}</p>
                         </div>
                     </div>
                 </div>
@@ -40,7 +47,7 @@
                         </div>
                         <div>
                             <p class="text-[11px] text-gray-500 font-medium uppercase tracking-widest">Total Layers</p>
-                            <p class="text-2xl font-bold text-gray-900 mt-0.5">{{ \App\Models\CltLayer::count() }}</p>
+                            <p class="text-2xl font-bold text-gray-900 mt-0.5">{{ CltLayer::count() }}</p>
                         </div>
                     </div>
                 </div>
@@ -52,7 +59,7 @@
                         </div>
                         <div>
                             <p class="text-[11px] text-gray-500 font-medium uppercase tracking-widest">Active Layups</p>
-                            <p class="text-2xl font-bold text-gray-900 mt-0.5">{{ \App\Models\CltLayup::where('status', 'Active')->count() }}</p>
+                            <p class="text-2xl font-bold text-gray-900 mt-0.5">{{ CltLayup::where('status', 'Active')->count() }}</p>
                         </div>
                     </div>
                 </div>
@@ -74,14 +81,14 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-50">
-                                @foreach(\App\Models\Supplier::withCount('cltLayups')->latest()->take(5)->get() as $s)
+                                @foreach(Supplier::withCount('cltLayups')->latest()->take(5)->get() as $s)
                                 <tr class="hover:bg-gray-50 transition-colors">
                                     <td class="whitespace-nowrap py-3.5 pl-6 pr-3 text-sm font-medium text-gray-900">{{ $s->name }}</td>
                                     <td class="whitespace-nowrap px-3 py-3.5 text-sm text-gray-500">{{ $s->location ?: '-' }}</td>
                                     <td class="whitespace-nowrap px-3 py-3.5">
                                         <span class="inline-flex items-center justify-center rounded bg-gray-100 px-2.5 py-1 text-xs font-bold text-gray-600">{{ $s->clt_layups_count }}</span>
                                     </td>
-                                    <td class="whitespace-nowrap py-3.5 pl-3 pr-6 text-sm text-gray-400">{{ $s->last_audit_date ? \Carbon\Carbon::parse($s->last_audit_date)->format('M d, Y') : '-' }}</td>
+                                    <td class="whitespace-nowrap py-3.5 pl-3 pr-6 text-sm text-gray-400">{{ $s->last_audit_date ? Carbon::parse($s->last_audit_date)->format('M d, Y') : '-' }}</td>
                                 </tr>
                                 @endforeach
                             </tbody>
