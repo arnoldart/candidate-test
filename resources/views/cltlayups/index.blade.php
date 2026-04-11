@@ -62,11 +62,16 @@
     <div class="max-w-7xl mx-auto pb-10" x-data="{ 
             showLayupModal: false, 
             showImportModal: false,
+            showConflictModal: false,
+            conflictState: {
+                conflicts: [],
+                currentIndex: 0,
+                resolutions: {} 
+            },
             isEdit: false, 
             layupName: '', 
             formAction: '{{ route('suppliers.layups.store', $supplier) }}',
             init() {
-                // Reopen modal if validation errors exist
                 @if($errors->any())
                     this.showLayupModal = true;
                     this.layupName = '{{ old('name') }}';
@@ -78,6 +83,150 @@
                         this.formAction = '{{ route('suppliers.layups.store', $supplier) }}';
                     @endif
                 @endif
+            },
+            importState: {
+                file: null,
+                fileName: '',
+                strategy: 'skip',
+                dryRun: false,
+                isProcessing: false,
+                results: null
+            },
+            handleDrop(e) {
+                if (e.dataTransfer.files.length > 0) {
+                    this.importState.file = e.dataTransfer.files[0];
+                    this.importState.fileName = this.importState.file.name;
+                    this.importState.results = null;
+                }
+            },
+            handleFileSelect(e) {
+                if (e.target.files.length > 0) {
+                    this.importState.file = e.target.files[0];
+                    this.importState.fileName = this.importState.file.name;
+                    this.importState.results = null;
+                }
+            },
+            cancelImport() {
+                this.showImportModal = false;
+                this.showConflictModal = false;
+                this.importState.file = null;
+                this.importState.fileName = '';
+                this.importState.results = null;
+                this.importState.strategy = 'skip';
+                this.importState.dryRun = false;
+                this.conflictState.resolutions = {};
+            },
+            viewConflicts() {
+                this.showImportModal = false;
+                this.showConflictModal = true;
+                this.conflictState.conflicts = this.importState.results.conflicts || [];
+                this.conflictState.currentIndex = 0;
+                this.conflictState.resolutions = {};
+            },
+            changeConflictIndex(step) {
+                let newIndex = this.conflictState.currentIndex + step;
+                if (newIndex >= 0 && newIndex < this.conflictState.conflicts.length) {
+                    this.conflictState.currentIndex = newIndex;
+                }
+            },
+            resolveConflict(action) {
+                let currentLayup = this.conflictState.conflicts[this.conflictState.currentIndex];
+                if (!currentLayup) return;
+                
+                this.conflictState.resolutions[currentLayup.layup_name] = action;
+                
+                if (Object.keys(this.conflictState.resolutions).length < this.conflictState.conflicts.length) {
+                    let nextIndex = this.conflictState.conflicts.findIndex(c => !this.conflictState.resolutions[c.layup_name]);
+                    if (nextIndex !== -1) {
+                        this.conflictState.currentIndex = nextIndex;
+                    }
+                }
+            },
+            async applyAllResolutions() {
+                this.showConflictModal = false;
+                this.showImportModal = true;
+                this.importState.isProcessing = true;
+                this.importState.results = null;
+
+                const formData = new FormData();
+                formData.append('file', this.importState.file);
+                formData.append('dry_run', 0);
+                formData.append('resolution_map', JSON.stringify(this.conflictState.resolutions));
+                
+                try {
+                    const response = await fetch('{{ route('suppliers.import', $supplier) }}', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        },
+                        body: formData
+                    });
+                    
+                    const result = await response.json();
+                    
+                    this.importState.results = {
+                        success: result.success || false,
+                        message: result.message || 'Unknown error occurred.',
+                        stats: result.stats || null,
+                        conflicts: result.conflicts || null
+                    };
+                    
+                    if (this.importState.results.success) {
+                        setTimeout(() => window.location.reload(), 2000);
+                    }
+                } catch(err) {
+                    this.importState.results = { success: false, message: 'A server error occurred during resolved import.' };
+                } finally {
+                    this.importState.isProcessing = false;
+                }
+            },
+            async uploadData() {
+                if (!this.importState.file) return alert('Please select a file first.');
+                
+                this.importState.isProcessing = true;
+                this.importState.results = null;
+
+                const formData = new FormData();
+                formData.append('file', this.importState.file);
+                formData.append('strategy', this.importState.strategy);
+                formData.append('dry_run', this.importState.dryRun ? 1 : 0);
+                
+                try {
+                    const response = await fetch('{{ route('suppliers.import', $supplier) }}', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        },
+                        body: formData
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (response.status === 422) {
+                        this.importState.results = {
+                            success: false,
+                            message: result.message || 'Validation failed. Please check your JSON format.'
+                        };
+                        return;
+                    }
+                    
+                    this.importState.results = {
+                        success: result.success || false,
+                        message: result.message || 'Unknown error occurred.',
+                        stats: result.stats || null,
+                        conflicts: result.conflicts || null
+                    };
+                    
+                    if (this.importState.results.success && !this.importState.dryRun) {
+                        setTimeout(() => window.location.reload(), 2000);
+                    }
+                } catch(err) {
+                    this.importState.results = { success: false, message: 'A server error occurred during import.' };
+                } finally {
+                    this.importState.isProcessing = false;
+                }
             }
         }">
         
@@ -227,5 +376,7 @@
         </div>
 
         @include('cltlayups.import-modal')
+
+        @include('cltlayups.conflict-modal')
     </div>
 </x-app-layout>

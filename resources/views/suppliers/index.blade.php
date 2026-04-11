@@ -36,14 +36,11 @@
                     this.showModal = true;
                 });
                 
-                // Reopen modal if there are errors from a previous submisstion
                 @if($errors->any())
                     this.showModal = true;
                     this.supplierName = '{{ old('name') }}';
-                    // Determine if it was an edit or create based on old method
                     @if(old('_method') == 'PUT')
                         this.isEdit = true;
-                        // The action might be tricky to recover, consider storing ID in session, but we'll default to index for safety if ID lost
                         this.formAction = '{{ old('action_url') ?? route('suppliers.index') }}';
                     @else
                         this.isEdit = false;
