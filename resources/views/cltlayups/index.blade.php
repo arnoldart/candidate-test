@@ -21,7 +21,7 @@
             
             <div class="flex items-center">
                 <button type="button" class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-colors">
-                    <svg class="mr-2 h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                    <i class="fa-solid fa-pen-to-square mr-2 text-gray-500"></i>
                     Edit Supplier
                 </button>
             </div>
@@ -32,28 +32,28 @@
             <div class="px-6 py-5">
                 <dt class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Primary Contact</dt>
                 <dd class="flex items-center text-[15px] font-medium text-gray-700">
-                    <svg class="mr-2 h-5 w-5 text-[#447A60]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                    <i class="fa-solid fa-envelope mr-2 text-[#447A60] text-lg"></i>
                     engineering@nordic.ca
                 </dd>
             </div>
             <div class="px-6 py-5">
                 <dt class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Location</dt>
                 <dd class="flex items-center text-[15px] font-medium text-gray-700">
-                    <svg class="mr-2 h-5 w-5 text-[#447A60]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.242-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    <i class="fa-solid fa-location-dot mr-2 text-[#447A60] text-lg"></i>
                     Montreal, QC, Canada
                 </dd>
             </div>
             <div class="px-6 py-5">
                 <dt class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Material Certifications</dt>
                 <dd class="flex items-center text-[15px] font-medium text-gray-700">
-                    <svg class="mr-2 h-5 w-5 text-[#447A60]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <i class="fa-solid fa-certificate mr-2 text-[#447A60] text-lg"></i>
                     SPF No. 1/2, D. Fir-L
                 </dd>
             </div>
             <div class="px-6 py-5">
                 <dt class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Last Audit Date</dt>
                 <dd class="flex items-center text-[15px] font-medium text-gray-700">
-                    <svg class="mr-2 h-5 w-5 text-[#447A60]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                    <i class="fa-solid fa-calendar-check mr-2 text-[#447A60] text-lg"></i>
                     Oct 12, 2023
                 </dd>
             </div>
@@ -86,15 +86,15 @@
             
             <div class="flex items-center gap-3">
                 <button type="button" class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-colors">
-                    <svg class="mr-2 h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                    <i class="fa-solid fa-file-import mr-2 text-gray-500 opacity-80 text-[13px]"></i>
                     Import
                 </button>
                 <button type="button" class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-colors">
-                    <svg class="mr-2 h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    <i class="fa-solid fa-cloud-arrow-down mr-2 text-gray-500 opacity-80 text-[13px]"></i>
                     Export
                 </button>
                 <button type="button" @click="isEdit = false; layupName = ''; formAction = '{{ route('suppliers.layups.store', $supplier) }}'; showLayupModal = true;" class="inline-flex items-center justify-center rounded-md bg-[#447A60] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#36614D] transition-colors">
-                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                    <i class="fa-solid fa-plus w-4 h-4 mr-1 text-[13px]"></i>
                     Add Layup
                 </button>
             </div>
@@ -127,7 +127,6 @@
                                 $thickness = $layup->clt_layers_sum_thickness ?? 0;
                             @endphp
                             <tr onclick="window.location='{{ route('layups.layers.index', $layup) }}'" class="hover:bg-gray-50 transition-colors relative group/row cursor-pointer">
-                                {{-- LAYUP DUMMY DATA --}}
                                 <td class="whitespace-nowrap py-[22px] pl-6 pr-3 text-sm text-gray-500 font-mono tracking-widest">
                                     L-{{ str_pad($layup->id, 3, '0', STR_PAD_LEFT) }}-A
                                 </td>
@@ -148,17 +147,21 @@
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-[22px]">
                                     <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium {{ explode(' dot-', $colorStatus)[0] }}">
-                                        <svg class="-ml-0.5 mr-1.5 h-2 w-2 {{ explode(' dot-', $colorStatus)[1] }}" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" /></svg>
+                                        <i class="fa-solid fa-circle text-[8px] mr-1.5 opacity-80 mb-px {{ explode(' dot-', $colorStatus)[1] }}"></i>
                                         {{ $statusDummy }}
                                     </span>
                                 </td>
                                 <td class="whitespace-nowrap py-[22px] pl-3 pr-6 text-right text-sm font-medium">
-                                    <div class="flex justify-end gap-3 opacity-0 group-hover/row:opacity-100 transition-opacity">
-                                        <button type="button" @click.stop="isEdit = true; layupName = '{{ addslashes($layup->name) }}'; formAction = '{{ route('suppliers.layups.update', ['supplier' => $supplier->id, 'layup' => $layup->id]) }}'; showLayupModal = true;" class="text-blue-600 hover:text-blue-900 font-semibold focus:outline-none">Edit</button>
+                                    <div class="flex justify-end gap-2">
+                                        <button type="button" @click.stop="isEdit = true; layupName = '{{ addslashes($layup->name) }}'; formAction = '{{ route('suppliers.layups.update', ['supplier' => $supplier->id, 'layup' => $layup->id]) }}'; showLayupModal = true;" class="inline-flex items-center justify-center w-8 h-8 rounded border border-gray-200 bg-white text-gray-500 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-colors focus:outline-none" title="Edit">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </button>
                                         <form action="{{ route('suppliers.layups.destroy', ['supplier' => $supplier->id, 'layup' => $layup->id]) }}" method="POST" class="inline" onsubmit="return confirm('Delete this layup?');">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="text-red-600 hover:text-red-900 font-semibold">Delete</button>
+                                            <button type="submit" class="inline-flex items-center justify-center w-8 h-8 rounded border border-gray-200 bg-white text-gray-500 hover:text-red-600 hover:border-red-200 hover:bg-red-50 transition-colors focus:outline-none" title="Delete">
+                                                <i class="fa-regular fa-trash-can"></i>
+                                            </button>
                                         </form>
                                     </div>
                                 </td>
@@ -189,9 +192,7 @@
                             <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                                 <div class="sm:flex sm:items-start">
                                     <div class="mx-auto flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#E6F3EE] sm:mx-0 sm:h-10 sm:w-10">
-                                        <svg class="h-6 w-6 text-[#447A60]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                                        </svg>
+                                        <i class="fa-solid fa-layer-group text-[18px] text-[#447A60]"></i>
                                     </div>
                                     <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left w-full">
                                         <h3 class="text-base font-semibold leading-6 text-gray-900" id="modal-title" x-text="isEdit ? 'Edit Layup' : 'Add New Layup'"></h3>

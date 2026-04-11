@@ -12,7 +12,7 @@ class SupplierController extends Controller
 {
     public function index(Request $request): View
     {
-        $query = Supplier::query();
+        $query = Supplier::query()->withCount('cltLayups');
 
         if ($request->has('search') && $request->search != '') {
             $query->where('name', 'like', '%' . $request->search . '%');
