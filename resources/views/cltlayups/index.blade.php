@@ -352,11 +352,10 @@
             }
         }">
         
+        <h2 class="text-2xl font-bold text-gray-900 whitespace-nowrap" style="font-family: 'Merriweather', serif;">Associated Layups</h2>
         <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6 mt-4">
             <div class="flex flex-col sm:flex-row items-center gap-4 w-full text-center sm:text-left">
-                <h2 class="text-2xl font-bold text-gray-900 whitespace-nowrap" style="font-family: 'Merriweather', serif;">Associated Layups</h2>
-                
-                <form action="{{ route('suppliers.layups.index', $supplier) }}" method="GET" class="w-full sm:w-64 sm:ml-2">
+                <form action="{{ route('suppliers.layups.index', $supplier) }}" method="GET" class="w-full sm:w-64">
                     <label for="search" class="sr-only">Search layups by name...</label>
                     <div class="relative rounded-md shadow-sm">
                         <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
