@@ -14,9 +14,19 @@ class CltLayup extends Model
     protected $fillable = [
         "supplier_id",
         "name",
+        "species_grade",
         "status",
         "created_by",
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::updating(function ($layup) {
+            $layup->revision = $layup->revision + 1;
+        });
+    }
 
     public function supplier(): BelongsTo
     {

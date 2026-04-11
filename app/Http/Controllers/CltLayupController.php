@@ -8,9 +8,14 @@ use App\Models\Supplier;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use App\Contracts\CltLayupServiceInterface;
 
 class CltLayupController extends Controller
 {
+    public function __construct(protected CltLayupServiceInterface $layupService)
+    {
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -86,15 +91,7 @@ class CltLayupController extends Controller
      */
     public function duplicate(CltLayup $layup): RedirectResponse
     {
-        $newLayup = $layup->replicate();
-        $newLayup->name = $layup->name . ' (Copy)';
-        $newLayup->save();
-
-        foreach ($layup->cltLayers as $layer) {
-            $newLayer = $layer->replicate();
-            $newLayer->layup_id = $newLayup->id;
-            $newLayer->save();
-        }
+        $newLayup = $this->layupService->duplicate($layup);
 
         return redirect()->route('layups.layers.index', $newLayup)
             ->with('success', 'CLT Layup berhasil diduplikasi.');

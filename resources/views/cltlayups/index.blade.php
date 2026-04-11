@@ -76,6 +76,7 @@
             },
             isEdit: false, 
             layupName: '', 
+            layupSpeciesGrade: '',
             layupStatus: 'Draft',
             layupCreatedBy: '',
             supplierNameEdit: '{{ addslashes($supplier->name) }}',
@@ -104,6 +105,7 @@
                     @else
                         this.showLayupModal = true;
                         this.layupName = '{{ old('name') }}';
+                        this.layupSpeciesGrade = '{{ old('species_grade') }}';
                         this.layupStatus = '{{ old('status', 'Draft') }}';
                         this.layupCreatedBy = '{{ old('created_by') }}';
                         @if(old('_method') == 'PUT')
@@ -341,10 +343,10 @@
                                     <span class="inline-flex items-center justify-center rounded bg-gray-100 px-2.5 py-1 text-xs font-bold text-gray-600 tracking-wide">{{ $plyCount }}</span>
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-[22px] text-[14px] text-gray-500">
-                                    Spruce / Mixed
+                                    {{ $layup->species_grade ?: '-' }}
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-[22px] text-[14px] text-gray-400">
-                                    Rev {{ ($loop->index % 4) + 1 }} (Oct 10)
+                                    Rev {{ $layup->revision }} ({{ $layup->updated_at->format('M d') }})
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-[22px]">
                                     <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium {{ explode(' dot-', $colorStatus)[0] }}">
@@ -357,7 +359,7 @@
                                         <a href="{{ route('layups.layers.index', $layup) }}" class="inline-flex items-center justify-center w-8 h-8 rounded border border-gray-200 bg-white text-gray-500 hover:text-green-600 hover:border-green-200 hover:bg-green-50 transition-colors focus:outline-none" title="View Details">
                                             <i class="fa-solid fa-eye"></i>
                                         </a>
-                                        <button type="button" @click.stop="isEdit = true; layupName = '{{ addslashes($layup->name) }}'; layupStatus = '{{ $layup->status ?: 'Draft' }}'; layupCreatedBy = '{{ addslashes($layup->created_by ?? '') }}'; formAction = '{{ route('suppliers.layups.update', ['supplier' => $supplier->id, 'layup' => $layup->id]) }}'; showLayupModal = true;" class="inline-flex items-center justify-center w-8 h-8 rounded border border-gray-200 bg-white text-gray-500 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-colors focus:outline-none" title="Edit">
+                                        <button type="button" @click.stop="isEdit = true; layupName = '{{ addslashes($layup->name) }}'; layupSpeciesGrade = '{{ addslashes($layup->species_grade ?? '') }}'; layupStatus = '{{ $layup->status ?: 'Draft' }}'; layupCreatedBy = '{{ addslashes($layup->created_by ?? '') }}'; formAction = '{{ route('suppliers.layups.update', ['supplier' => $supplier->id, 'layup' => $layup->id]) }}'; showLayupModal = true;" class="inline-flex items-center justify-center w-8 h-8 rounded border border-gray-200 bg-white text-gray-500 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-colors focus:outline-none" title="Edit">
                                             <i class="fa-solid fa-pen-to-square"></i>
                                         </button>
                                         <form action="{{ route('suppliers.layups.destroy', ['supplier' => $supplier->id, 'layup' => $layup->id]) }}" method="POST" class="inline" onsubmit="return confirm('Delete this layup?');">
@@ -410,6 +412,15 @@
                                                 <input type="text" name="name" id="name" x-model="layupName" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-[#447A60] sm:text-sm sm:leading-6" placeholder="e.g. Standard 3-Ply Wall" required autofocus>
                                             </div>
                                             @error('name')
+                                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                            @enderror
+                                        </div>
+                                        <div class="mt-4">
+                                            <label for="species_grade" class="block text-sm font-medium leading-6 text-gray-900">Species / Grade</label>
+                                            <div class="mt-2">
+                                                <input type="text" name="species_grade" id="species_grade" x-model="layupSpeciesGrade" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-[#447A60] sm:text-sm sm:leading-6" placeholder="e.g. Spruce / Mixed" required>
+                                            </div>
+                                            @error('species_grade')
                                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                             @enderror
                                         </div>

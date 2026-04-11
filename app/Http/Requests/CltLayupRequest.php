@@ -23,6 +23,7 @@ class CltLayupRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
+            'species_grade' => 'required|string|max:255',
             'status' => 'required|string|in:Active,Draft,Archived',
             'created_by' => 'required|string|max:255',
         ];
@@ -32,6 +33,7 @@ class CltLayupRequest extends FormRequest
     {
         return [
             'name.required' => 'Nama layup harus diisi',
+            'species_grade.required' => 'Species/Grade harus diisi',
             'status.required' => 'Status harus dipilih',
             'created_by.required' => 'Pembuat (Created By) harus diisi',
         ];
