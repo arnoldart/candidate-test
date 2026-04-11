@@ -62,16 +62,20 @@ class SupplierService implements SupplierServiceInterface
                         }
                     }
 
-                    if ($existingLayersData === $importingLayersData) {
+                    $isIdentical = ($existingLayersData === $importingLayersData);
+
+                    if ($isIdentical && $currentStrategy !== 'duplicate') {
                         $stats['skipped']++;
                         continue;
                     }
 
-                    $stats['conflicts_detected']++;
+                    if (!$isIdentical) {
+                        $stats['conflicts_detected']++;
+                    }
 
                     if ($currentStrategy === 'skip') {
                         $stats['skipped']++;
-                        if ($isDryRun) {
+                        if ($isDryRun && !$isIdentical) {
                             $conflicts[] = [
                                 'layup_name' => $layupData['name'],
                                 'existing_layers' => $existingLayersData,
@@ -91,8 +95,8 @@ class SupplierService implements SupplierServiceInterface
                                 'created_by' => $existingLayup->created_by,
                             ]);
                             $this->processLayers($newLayup, $importingLayersData);
-                            $stats['created']++;
                         }
+                        $stats['created']++;
                         continue;
                     }
 
@@ -100,8 +104,8 @@ class SupplierService implements SupplierServiceInterface
                         if (!$isDryRun) {
                             $existingLayup->cltLayers()->delete();
                             $this->processLayers($existingLayup, $importingLayersData);
-                            $stats['updated']++;
                         }
+                        $stats['updated']++;
                         continue;
                     }
                 } else {
@@ -126,8 +130,8 @@ class SupplierService implements SupplierServiceInterface
                         }
                         
                         $this->processLayers($newLayup, $importingLayersData);
-                        $stats['created']++;
                     }
+                    $stats['created']++;
                 }
             }
 

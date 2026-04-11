@@ -25,7 +25,7 @@ class SupplierController extends Controller
             $query->where('name', 'like', '%' . $request->search . '%');
         }
 
-        $suppliers = $query->orderBy('name')->paginate(10)->withQueryString();
+        $suppliers = $query->orderByDesc('created_at')->paginate(10)->withQueryString();
         
         return view('suppliers.index', compact('suppliers'));
     }

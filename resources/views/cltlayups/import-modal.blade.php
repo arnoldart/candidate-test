@@ -67,13 +67,13 @@
                         <div class="w-full">
                             <h3 class="text-sm font-bold" :class="importState.results?.success ? 'text-[#166534]' : 'text-[#B91C1C]'" x-text="importState.results?.message"></h3>
                             
-                            {{-- <div class="mt-2 text-[12px] flex flex-col gap-1" :class="importState.results?.success ? 'text-[#166534]' : 'text-[#DC2626]'" x-show="importState.results?.stats && importState.results.success">
-                                <div class="grid grid-cols-3 gap-2 mt-1 bg-white/50 p-2 rounded">
-                                    <div><span class="font-bold">Created:</span> <span x-text="importState.results?.stats?.created"></span></div>
-                                    <div><span class="font-bold">Updated:</span> <span x-text="importState.results?.stats?.updated"></span></div>
-                                    <div><span class="font-bold">Skipped:</span> <span x-text="importState.results?.stats?.skipped"></span></div>
+                            <div class="mt-2 text-[12px] flex flex-col gap-1" :class="importState.results?.success ? 'text-[#166534]' : 'text-[#DC2626]'" x-show="importState.dryRun && importState.results?.stats && importState.results.success">
+                                <div class="grid grid-cols-3 gap-2 mt-1 bg-white/50 p-2 rounded border border-[#DCFCE7] shadow-sm">
+                                    <div><span class="font-bold">Simulated Creates:</span> <span x-text="importState.results?.stats?.created"></span></div>
+                                    <div><span class="font-bold">Simulated Updates:</span> <span x-text="importState.results?.stats?.updated"></span></div>
+                                    <div><span class="font-bold">Simulated Skips:</span> <span x-text="importState.results?.stats?.skipped"></span></div>
                                 </div>
-                            </div> --}}
+                            </div>
                         </div>
                     </div>
 
