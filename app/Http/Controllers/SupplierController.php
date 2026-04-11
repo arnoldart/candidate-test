@@ -35,6 +35,11 @@ class SupplierController extends Controller
     {
         $supplier->update($request->validated());
 
+        if ($request->has('redirect_to')) {
+            return redirect($request->input('redirect_to'))
+                ->with('success', 'Supplier berhasil diperbarui.');
+        }
+
         return redirect()->route('suppliers.index')
             ->with('success', 'Supplier berhasil diperbarui.');
     }
@@ -106,31 +111,36 @@ class SupplierController extends Controller
                 $currentStrategy = $resolutionMap[$layupData['name']] ?? $globalStrategy;
 
                 if ($existingLayup) {
+                    $existingLayersData = $existingLayup->cltLayers()->orderBy('layer_order')->get()->map(function($layer, $index) {
+                        return [
+                            'order' => $layer->layer_order ?? ($index + 1),
+                            'thickness' => (float) $layer->thickness,
+                            'width' => (float) $layer->width,
+                            'angle' => (float) $layer->angle,
+                        ];
+                    })->toArray();
+
+                    $importingLayersData = [];
+                    if (isset($layupData['clt_layers']) && is_array($layupData['clt_layers'])) {
+                        foreach ($layupData['clt_layers'] as $idx => $inLayer) {
+                            $importingLayersData[] = [
+                                'order' => $inLayer['layer_order'] ?? ($idx + 1),
+                                'thickness' => (float) ($inLayer['thickness'] ?? 0),
+                                'width' => (float) ($inLayer['width'] ?? 0),
+                                'angle' => (float) ($inLayer['angle'] ?? 0),
+                            ];
+                        }
+                    }
+
+                    // Auto-skip if data is perfectly identical
+                    if ($existingLayersData === $importingLayersData) {
+                        $stats['skipped']++;
+                        continue;
+                    }
+
                     $stats['conflicts_detected']++;
 
                     if ($isDryRun && !isset($resolutionMap[$layupData['name']])) {
-                        // Gather detailed data for comparative UI explicitly only when unresolved during Dry Run
-                        $existingLayersData = $existingLayup->cltLayers()->orderBy('layer_order')->get()->map(function($layer, $index) {
-                            return [
-                                'order' => $layer->layer_order ?? ($index + 1),
-                                'thickness' => (float) $layer->thickness,
-                                'width' => (float) $layer->width,
-                                'angle' => (float) $layer->angle,
-                            ];
-                        })->toArray();
-
-                        $importingLayersData = [];
-                        if (isset($layupData['clt_layers']) && is_array($layupData['clt_layers'])) {
-                            foreach ($layupData['clt_layers'] as $idx => $inLayer) {
-                                $importingLayersData[] = [
-                                    'order' => $inLayer['layer_order'] ?? ($idx + 1),
-                                    'thickness' => (float) ($inLayer['thickness'] ?? 0),
-                                    'width' => (float) ($inLayer['width'] ?? 0),
-                                    'angle' => (float) ($inLayer['angle'] ?? 0),
-                                ];
-                            }
-                        }
-                        
                         $conflicts[] = [
                             'layup_name' => $layupData['name'],
                             'existing_layers' => $existingLayersData,

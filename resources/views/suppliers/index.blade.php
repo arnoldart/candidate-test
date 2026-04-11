@@ -101,7 +101,7 @@
                                 $initials = strtoupper(substr($supplier->name, 0, 2));
                                 $colorStyle = $colors[$loop->index % count($colors)];
                             @endphp
-                            <tr @click="window.location='{{ route('suppliers.layups.index', $supplier) }}'" class="hover:bg-gray-50 transition-colors relative group/row cursor-pointer">
+                            <tr class="hover:bg-gray-50 transition-colors relative group/row">
                                 <td class="whitespace-nowrap py-5 pl-6 pr-3">
                                     <div class="flex items-center">
                                         <div class="h-11 w-11 shrink-0 flex items-center justify-center rounded-full {{ $colorStyle['bg'] }} {{ $colorStyle['text'] }} font-semibold text-sm">
@@ -121,6 +121,9 @@
                                 </td>
                                 <td class="whitespace-nowrap py-5 pl-3 pr-6 text-right text-sm font-medium">
                                     <div class="flex justify-end gap-2">
+                                        <a href="{{ route('suppliers.layups.index', $supplier) }}" class="inline-flex items-center justify-center w-8 h-8 rounded border border-gray-200 bg-white text-gray-500 hover:text-green-600 hover:border-green-200 hover:bg-green-50 transition-colors focus:outline-none" title="View Details">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </a>
                                         <a href="{{ route('suppliers.export', $supplier) }}" class="inline-flex items-center justify-center w-8 h-8 rounded border border-gray-200 bg-white text-gray-500 hover:text-[#447A60] hover:border-[#447A60] hover:bg-[#F0F7F4] transition-colors focus:outline-none" title="Export">
                                             <i class="fa-solid fa-file-export"></i>
                                         </a>

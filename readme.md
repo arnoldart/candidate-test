@@ -11,9 +11,9 @@
 
 ### Core Features (Main Criteria)
 
-- [ ] CRUD Suppliers
-- [ ] CRUD CLT Layups (nested under Supplier)
-- [ ] CRUD CLT Layers (nested under Layup)
+- [x] CRUD Suppliers
+- [x] CRUD CLT Layups (nested under Supplier)
+- [x] CRUD CLT Layers (nested under Layup)
 
 The structure should properly reflect the hierarchy:
 Supplier → Layups → Layers
@@ -26,10 +26,10 @@ Below is the Entity Relationship Diagram (ERD) representing the data structure:
 
 ### Import / Export (Main Criteria)
 
-- [ ] **Export by Supplier**
+- [x] **Export by Supplier**
     - Must include: Supplier + all related Layups + all related Layers
 
-- [ ] **Import by Supplier**
+- [x] **Import by Supplier**
     - Must create and/or update Layups and Layers under the specified supplier
 
 Format is flexible (JSON / CSV / Excel, etc.). JSON format is completely acceptable.
