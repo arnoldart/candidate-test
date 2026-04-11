@@ -1,5 +1,7 @@
 # Feature Test Assignment
 
+> This repository is a test interview submission.
+
 ## 1. Instructions
 
 - Clone or fork this repository.
@@ -147,6 +149,10 @@ Include one of the following with your submission:
 
 - A demo video (recommended), or
 - A live project link
+
+Demo video:
+
+- https://youtu.be/PoSPgC4yPR0
 
 Ensure the demo clearly showcases:
 
