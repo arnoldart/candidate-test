@@ -21,6 +21,8 @@ class CltLayupController extends Controller
      */
     public function index(Request $request, Supplier $supplier): View
     {
+        $this->authorize('viewAny', CltLayup::class);
+
         $query = $supplier->cltLayups()->withCount('cltLayers')->withSum('cltLayers', 'thickness');
 
         if ($request->has('search') && $request->search != '') {
@@ -45,6 +47,8 @@ class CltLayupController extends Controller
      */
      public function store(CltLayupRequest $request, Supplier $supplier): RedirectResponse
     {
+        $this->authorize('create', CltLayup::class);
+
         $supplier->cltLayups()->create($request->validated());
         return redirect()->route('layups.layers.index', $supplier->cltLayups()->latest('id')->first())
             ->with('success', 'CLT Layup berhasil ditambahkan.');
@@ -71,6 +75,8 @@ class CltLayupController extends Controller
      */
     public function update(CltLayupRequest $request, Supplier $supplier, CltLayup $layup): RedirectResponse
     {
+        $this->authorize('update', $layup);
+
         $layup->update($request->validated());
         return redirect()->route('suppliers.layups.index', $supplier)
             ->with('success', 'CLT Layup berhasil diperbarui.');
@@ -81,6 +87,8 @@ class CltLayupController extends Controller
      */
     public function destroy(Supplier $supplier, CltLayup $layup): RedirectResponse
     {
+        $this->authorize('delete', $layup);
+
         $layup->delete();
         return redirect()->route('suppliers.layups.index', $supplier)
             ->with('success', 'CLT Layup berhasil dihapus.');
@@ -91,6 +99,8 @@ class CltLayupController extends Controller
      */
     public function duplicate(CltLayup $layup): RedirectResponse
     {
+        $this->authorize('duplicate', $layup);
+
         $newLayup = $this->layupService->duplicate($layup);
 
         return redirect()->route('layups.layers.index', $newLayup)

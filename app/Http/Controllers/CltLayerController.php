@@ -46,10 +46,8 @@ class CltLayerController extends Controller
             'layers.*.angle' => 'required|numeric',
         ]);
 
-        // Delete previous layers
         $layup->cltLayers()->delete();
 
-        // Create new layers efficiently
         if ($request->has('layers')) {
             $layersData = [];
             foreach ($request->layers as $index => $layer) {

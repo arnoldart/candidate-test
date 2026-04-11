@@ -17,6 +17,8 @@ class SupplierController extends Controller
 
     public function index(Request $request): View
     {
+        $this->authorize('viewAny', Supplier::class);
+
         $query = Supplier::query()->withCount('cltLayups');
 
         if ($request->has('search') && $request->search != '') {
@@ -30,6 +32,8 @@ class SupplierController extends Controller
 
     public function store(SupplierRequest $request): RedirectResponse
     {
+        $this->authorize('create', Supplier::class);
+
         Supplier::create($request->validated());
 
         return redirect()->route('suppliers.index')
@@ -38,6 +42,8 @@ class SupplierController extends Controller
 
     public function update(SupplierRequest $request, Supplier $supplier): RedirectResponse
     {
+        $this->authorize('update', $supplier);
+
         $supplier->update($request->validated());
 
         if ($request->has('redirect_to')) {
@@ -51,6 +57,8 @@ class SupplierController extends Controller
 
     public function destroy(Supplier $supplier): RedirectResponse
     {
+        $this->authorize('delete', $supplier);
+
         $supplier->delete();
 
         return redirect()->route('suppliers.index')
@@ -59,6 +67,8 @@ class SupplierController extends Controller
 
     public function export(Supplier $supplier)
     {
+        $this->authorize('export', $supplier);
+
         $jsonData = $this->supplierService->export($supplier);
         $fileName = 'supplier_' . str_replace(' ', '_', strtolower($supplier->name)) . '_data.json';
         
@@ -79,8 +89,10 @@ class SupplierController extends Controller
 
     public function import(Request $request, Supplier $supplier)
     {
+        $this->authorize('import', $supplier);
+
         $request->validate([
-            'file' => 'required|file|mimes:json,csv,txt|max:10240', // 10MB max
+            'file' => 'required|file|mimes:json,csv,txt|max:10240',
             'strategy' => 'in:skip,overwrite,duplicate',
             'dry_run' => 'boolean',
             'resolution_map' => 'nullable|string'

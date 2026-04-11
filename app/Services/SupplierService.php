@@ -62,13 +62,11 @@ class SupplierService implements SupplierServiceInterface
                         }
                     }
 
-                    // Auto-skip if data is perfectly identical
                     if ($existingLayersData === $importingLayersData) {
                         $stats['skipped']++;
                         continue;
                     }
 
-                    // Conflict detected
                     $stats['conflicts_detected']++;
 
                     if ($currentStrategy === 'skip') {
@@ -84,7 +82,6 @@ class SupplierService implements SupplierServiceInterface
                     }
 
                     if ($currentStrategy === 'duplicate') {
-                        // Append timestamp or counter string to name
                         $newName = $layupData['name'] . ' (Imported ' . time() . ')';
                         if (!$isDryRun) {
                             $newLayup = $supplier->cltLayups()->create([
@@ -108,7 +105,6 @@ class SupplierService implements SupplierServiceInterface
                         continue;
                     }
                 } else {
-                    // Layup does not exist; create it
                     if (!$isDryRun) {
                         $newLayup = $supplier->cltLayups()->create([
                             'name' => $layupData['name'],
