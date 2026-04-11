@@ -19,8 +19,8 @@
             </style>
         @endif
     </head>
-    <body class="font-sans antialiased dark:bg-black dark:text-white/50">
-        <div class="h-screen bg-gray-50 text-black/50 dark:bg-black dark:text-white/50">
+    <body class="font-sans antialiased text-gray-900 bg-white">
+        <div class="h-screen bg-gray-50 text-black/50">
             <img id="background" class="absolute h-full w-full object-cover" src="https://app.clttoolbox.com.au/images/login-bg.jpg" alt="Laravel background" />
             <div class="absolute inset-0 bg-black/40 animate-blur-in"></div>
             <div class="relative h-full flex flex-col">

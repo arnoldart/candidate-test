@@ -124,20 +124,94 @@
                 strategy: 'skip',
                 dryRun: false,
                 isProcessing: false,
-                results: null
+                results: null,
+                validationError: null
             },
-            handleDrop(e) {
+            validateFileData(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        try {
+                            const data = JSON.parse(event.target.result);
+                            const validation = this.performDataValidation(data);
+                            resolve(validation);
+                        } catch (err) {
+                            resolve({ valid: false, error: 'Invalid JSON format: ' + err.message });
+                        }
+                    };
+                    reader.onerror = () => reject('Error reading file');
+                    reader.readAsText(file);
+                });
+            },
+            performDataValidation(data) {
+                try {
+                    if (!data || typeof data !== 'object') {
+                        return { valid: false, error: 'Invalid data format. File must contain a valid JSON object.' };
+                    }
+                    if (!data.id || !data.name) {
+                        return { valid: false, error: 'Supplier data is missing required fields (id, name).' };
+                    }
+                    if (!Array.isArray(data.clt_layups)) {
+                        return { valid: false, error: 'Missing or invalid clt_layups array.' };
+                    }
+                    if (data.clt_layups.length === 0) {
+                        return { valid: false, error: 'clt_layups array is empty. At least one layup is required.' };
+                    }
+
+                    const firstLayup = data.clt_layups[0];
+                    const requiredLayupFields = ['id', 'supplier_id', 'name'];
+                    const optionalLayupFields = ['species_grade', 'revision', 'status', 'created_by'];
+                    const fieldsWithValues = optionalLayupFields.filter(field => firstLayup.hasOwnProperty(field));
+
+                    for (let i = 0; i < data.clt_layups.length; i++) {
+                        const layup = data.clt_layups[i];
+                        for (const field of requiredLayupFields) {
+                            if (!layup.hasOwnProperty(field) || layup[field] === null || layup[field] === undefined) {
+                                return { valid: false, error: 'Layup #' + (i + 1) + ' is missing required field [' + field + ']. Data appears to be corrupted.' };
+                            }
+                        }
+                        for (const field of fieldsWithValues) {
+                            if (!layup.hasOwnProperty(field)) {
+                                return { valid: false, error: 'Layup #' + (i + 1) + ' has missing value for [' + field + ']. Data is incomplete or corrupted. All layups must have consistent fields.' };
+                            }
+                        }
+                        if (!Array.isArray(layup.clt_layers)) {
+                            return { valid: false, error: 'Layup #' + (i + 1) + ' is missing or has invalid clt_layers array.' };
+                        }
+                        if (layup.clt_layers.length === 0) {
+                            return { valid: false, error: 'Layup #' + (i + 1) + ' has no layers. At least one layer is required.' };
+                        }
+                        const requiredLayerFields = ['id', 'layup_id', 'layer_order', 'thickness', 'width', 'angle'];
+                        for (let j = 0; j < layup.clt_layers.length; j++) {
+                            const layer = layup.clt_layers[j];
+                            for (const field of requiredLayerFields) {
+                                if (!layer.hasOwnProperty(field) || layer[field] === null || layer[field] === undefined) {
+                                    return { valid: false, error: 'Layer #' + (j + 1) + ' in Layup #' + (i + 1) + ' is missing required field [' + field + ']. Data is corrupted.' };
+                                }
+                            }
+                        }
+                    }
+                    return { valid: true, error: null };
+                } catch (error) {
+                    return { valid: false, error: 'Error validating data: ' + error.message };
+                }
+            },
+            async handleDrop(e) {
                 if (e.dataTransfer.files.length > 0) {
                     this.importState.file = e.dataTransfer.files[0];
                     this.importState.fileName = this.importState.file.name;
                     this.importState.results = null;
+                    const validation = await this.validateFileData(this.importState.file);
+                    this.importState.validationError = validation.valid ? null : validation.error;
                 }
             },
-            handleFileSelect(e) {
+            async handleFileSelect(e) {
                 if (e.target.files.length > 0) {
                     this.importState.file = e.target.files[0];
                     this.importState.fileName = this.importState.file.name;
                     this.importState.results = null;
+                    const validation = await this.validateFileData(this.importState.file);
+                    this.importState.validationError = validation.valid ? null : validation.error;
                 }
             },
             cancelImport() {
@@ -148,6 +222,7 @@
                 this.importState.results = null;
                 this.importState.strategy = 'skip';
                 this.importState.dryRun = false;
+                this.importState.validationError = null;
                 this.conflictState.resolutions = {};
             },
             viewConflicts() {
@@ -222,6 +297,11 @@
             },
             async uploadData() {
                 if (!this.importState.file) return alert('Please select a file first.');
+                
+                if (this.importState.validationError) {
+                    alert('Cannot import: ' + this.importState.validationError);
+                    return;
+                }
                 
                 this.importState.isProcessing = true;
                 this.importState.results = null;
