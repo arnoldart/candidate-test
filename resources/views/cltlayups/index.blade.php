@@ -27,8 +27,7 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mt-6 bg-white overflow-hidden rounded-xl border border-gray-100 shadow-sm divive-y sm:divide-y-0 sm:divide-x divide-gray-100">
-            <!-- Box 1 -->
+        {{-- <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mt-6 bg-white overflow-hidden rounded-xl border border-gray-100 shadow-sm divive-y sm:divide-y-0 sm:divide-x divide-gray-100">
             <div class="px-6 py-5">
                 <dt class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Primary Contact</dt>
                 <dd class="flex items-center text-[15px] font-medium text-gray-700">
@@ -57,7 +56,7 @@
                     Oct 12, 2023
                 </dd>
             </div>
-        </div>
+        </div> --}}
     </x-slot>
 
     <div class="max-w-7xl mx-auto pb-10" x-data="{ 
@@ -90,10 +89,10 @@
                     <i class="fa-solid fa-file-import mr-2 text-gray-500 opacity-80 text-[13px]"></i>
                     Import
                 </button>
-                <button type="button" class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-colors">
+                <a href="{{ route('suppliers.export', $supplier) }}" class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-colors">
                     <i class="fa-solid fa-cloud-arrow-down mr-2 text-gray-500 opacity-80 text-[13px]"></i>
                     Export
-                </button>
+                </a>
                 <button type="button" @click="isEdit = false; layupName = ''; formAction = '{{ route('suppliers.layups.store', $supplier) }}'; showLayupModal = true;" class="inline-flex items-center justify-center rounded-md bg-[#447A60] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#36614D] transition-colors">
                     <i class="fa-solid fa-plus w-4 h-4 mr-1 text-[13px]"></i>
                     Add Layup

@@ -69,10 +69,14 @@
                     <i class="fa-solid fa-filter mr-2 text-gray-500 opacity-80 text-[13px]"></i>
                     Filter
                 </button>
-                <button type="button" class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-colors">
+                {{-- <button type="button" class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-colors">
                     <i class="fa-solid fa-cloud-arrow-down mr-2 text-gray-500 opacity-80 text-[13px]"></i>
                     Export
-                </button>
+                </button> --}}
+                <a href="{{ route('suppliers.exportAll') }}" class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-colors">
+                    <i class="fa-solid fa-cloud-arrow-down mr-2 text-gray-500 opacity-80 text-[13px]"></i>
+                    Export All
+                </a>
             </div>
         </div>
 
@@ -120,6 +124,9 @@
                                 </td>
                                 <td class="whitespace-nowrap py-5 pl-3 pr-6 text-right text-sm font-medium">
                                     <div class="flex justify-end gap-2">
+                                        <a href="{{ route('suppliers.export', $supplier) }}" class="inline-flex items-center justify-center w-8 h-8 rounded border border-gray-200 bg-white text-gray-500 hover:text-[#447A60] hover:border-[#447A60] hover:bg-[#F0F7F4] transition-colors focus:outline-none" title="Export">
+                                            <i class="fa-solid fa-file-export"></i>
+                                        </a>
                                         <button type="button" @click.stop="$dispatch('open-supplier-modal', { isEdit: true, id: {{ $supplier->id }}, name: '{{ addslashes($supplier->name) }}' })" class="inline-flex items-center justify-center w-8 h-8 rounded border border-gray-200 bg-white text-gray-500 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-colors focus:outline-none" title="Edit">
                                             <i class="fa-solid fa-pen-to-square"></i>
                                         </button>

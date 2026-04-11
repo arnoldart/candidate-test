@@ -46,4 +46,24 @@ class SupplierController extends Controller
         return redirect()->route('suppliers.index')
             ->with('success', 'Supplier berhasil dihapus.');
     }
+
+    public function export(Supplier $supplier)
+    {
+        $supplier->load('cltLayups.cltLayers');
+        $fileName = 'supplier_' . str_replace(' ', '_', strtolower($supplier->name)) . '_data.json';
+        
+        return response($supplier->toJson(JSON_PRETTY_PRINT))
+            ->header('Content-Type', 'application/json')
+            ->header('Content-Disposition', 'attachment; filename="' . $fileName . '"');
+    }
+
+    public function exportAll()
+    {
+        $suppliers = Supplier::with('cltLayups.cltLayers')->get();
+        $fileName = 'all_suppliers_export_' . date('Ymd_His') . '.json';
+        
+        return response($suppliers->toJson(JSON_PRETTY_PRINT))
+            ->header('Content-Type', 'application/json')
+            ->header('Content-Disposition', 'attachment; filename="' . $fileName . '"');
+    }
 }
