@@ -21,7 +21,7 @@
                 </div>
                 
                 <div class="flex items-center">
-                    <button type="button" @click="$dispatch('open-supplier-modal')" class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-colors">
+                    <button type="button" @click="$dispatch('open-supplier-modal', { isEdit: true, id: {{ $supplier->id }}, name: '{{ addslashes($supplier->name) }}', primary_contact: '{{ addslashes($supplier->primary_contact ?? '') }}', location: '{{ addslashes($supplier->location ?? '') }}', material_certifications: '{{ addslashes($supplier->material_certifications ?? '') }}', last_audit_date: '{{ $supplier->last_audit_date ? \Carbon\Carbon::parse($supplier->last_audit_date)->format('Y-m-d') : '' }}' })" class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-colors">
                         <i class="fa-solid fa-pen-to-square mr-2 text-gray-500"></i>
                         Edit Supplier
                     </button>
@@ -33,30 +33,30 @@
                 <dt class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Primary Contact</dt>
                 <dd class="flex items-center text-[15px] font-medium text-gray-700">
                     <i class="fa-solid fa-envelope mr-2 text-[#447A60] text-lg"></i>
-                    engineering@nordic.ca
+                    {{ $supplier->primary_contact ?: '-' }}
                 </dd>
             </div>
             <div class="px-6 py-5">
                 <dt class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Location</dt>
                 <dd class="flex items-center text-[15px] font-medium text-gray-700">
                     <i class="fa-solid fa-location-dot mr-2 text-[#447A60] text-lg"></i>
-                    Montreal, QC, Canada
+                    {{ $supplier->location ?: '-' }}
                 </dd>
             </div>
             <div class="px-6 py-5">
                 <dt class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Material Certifications</dt>
                 <dd class="flex items-center text-[15px] font-medium text-gray-700">
                     <i class="fa-solid fa-certificate mr-2 text-[#447A60] text-lg"></i>
-                    SPF No. 1/2, D. Fir-L
+                    {{ $supplier->material_certifications ?: '-' }}
                 </dd>
             </div>
             <div class="px-6 py-5">
                 <dt class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Last Audit Date</dt>
                 <dd class="flex items-center text-[15px] font-medium text-gray-700">
                     <i class="fa-solid fa-calendar-check mr-2 text-[#447A60] text-lg"></i>
-                    Oct 12, 2023
+                    {{ $supplier->last_audit_date ? \Carbon\Carbon::parse($supplier->last_audit_date)->format('M d, Y') : '-' }}
                 </dd>
-        </div>
+            </div>
         </div>
     </x-slot>
 
@@ -76,7 +76,13 @@
             },
             isEdit: false, 
             layupName: '', 
+            layupStatus: 'Draft',
+            layupCreatedBy: '',
             supplierNameEdit: '{{ addslashes($supplier->name) }}',
+            supplierContactEdit: '{{ addslashes($supplier->primary_contact ?? '') }}',
+            supplierLocationEdit: '{{ addslashes($supplier->location ?? '') }}',
+            supplierCertsEdit: '{{ addslashes($supplier->material_certifications ?? '') }}',
+            supplierAuditEdit: '{{ $supplier->last_audit_date ? \Carbon\Carbon::parse($supplier->last_audit_date)->format('Y-m-d') : '' }}',
             formAction: '{{ route('suppliers.layups.store', $supplier) }}',
             init() {
                 let savedToast = sessionStorage.getItem('import_stats_toast');
@@ -88,14 +94,25 @@
                 }
 
                 @if($errors->any())
-                    this.showLayupModal = true;
-                    this.layupName = '{{ old('name') }}';
-                    @if(old('_method') == 'PUT')
-                        this.isEdit = true;
-                        this.formAction = '{{ old('action_url') ?? route('suppliers.layups.index', $supplier) }}';
+                    @if(old('redirect_to'))
+                        this.showSupplierModal = true;
+                        this.supplierNameEdit = '{{ old('name') }}';
+                        this.supplierContactEdit = '{{ old('primary_contact') }}';
+                        this.supplierLocationEdit = '{{ old('location') }}';
+                        this.supplierCertsEdit = '{{ old('material_certifications') }}';
+                        this.supplierAuditEdit = '{{ old('last_audit_date') }}';
                     @else
-                        this.isEdit = false;
-                        this.formAction = '{{ route('suppliers.layups.store', $supplier) }}';
+                        this.showLayupModal = true;
+                        this.layupName = '{{ old('name') }}';
+                        this.layupStatus = '{{ old('status', 'Draft') }}';
+                        this.layupCreatedBy = '{{ old('created_by') }}';
+                        @if(old('_method') == 'PUT')
+                            this.isEdit = true;
+                            this.formAction = '{{ old('action_url') ?? route('suppliers.layups.index', $supplier) }}';
+                        @else
+                            this.isEdit = false;
+                            this.formAction = '{{ route('suppliers.layups.store', $supplier) }}';
+                        @endif
                     @endif
                 @endif
             },
@@ -277,7 +294,7 @@
                     <i class="fa-solid fa-cloud-arrow-down mr-2 text-gray-500 opacity-80 text-[13px]"></i>
                     Export
                 </a>
-                <button type="button" @click="isEdit = false; layupName = ''; formAction = '{{ route('suppliers.layups.store', $supplier) }}'; showLayupModal = true;" class="inline-flex items-center justify-center rounded-md bg-[#447A60] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#36614D] transition-colors whitespace-nowrap">
+                <button type="button" @click="isEdit = false; layupName = ''; layupStatus = 'Draft'; layupCreatedBy = ''; formAction = '{{ route('suppliers.layups.store', $supplier) }}'; showLayupModal = true;" class="inline-flex items-center justify-center rounded-md bg-[#447A60] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#36614D] transition-colors whitespace-nowrap">
                     <i class="fa-solid fa-plus w-4 h-4 mr-1 text-[13px]"></i>
                     Add Layup
                 </button>
@@ -302,9 +319,9 @@
                     <tbody class="divide-y divide-gray-100 bg-white group border-b border-gray-100">
                         @forelse($layups as $layup)
                             @php
-                                $statusDummy = ['Active', 'Draft', 'Archived'][$loop->index % 3];
-                                $colorStatus = $statusDummy === 'Active' ? 'text-green-700 bg-green-50 border border-green-200 dot-green-500' :
-                                              ($statusDummy === 'Draft' ? 'text-yellow-700 bg-yellow-50 border border-yellow-200 dot-yellow-500' : 
+                                $status = $layup->status ?: 'Draft';
+                                $colorStatus = $status === 'Active' ? 'text-green-700 bg-green-50 border border-green-200 dot-green-500' :
+                                              ($status === 'Draft' ? 'text-yellow-700 bg-yellow-50 border border-yellow-200 dot-yellow-500' : 
                                               'text-gray-700 bg-gray-100 border border-gray-200 dot-gray-500');
                                 
                                 $plyCount = $layup->clt_layers_count ?? 0;
@@ -332,7 +349,7 @@
                                 <td class="whitespace-nowrap px-3 py-[22px]">
                                     <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium {{ explode(' dot-', $colorStatus)[0] }}">
                                         <i class="fa-solid fa-circle text-[8px] mr-1.5 opacity-80 mb-px {{ explode(' dot-', $colorStatus)[1] }}"></i>
-                                        {{ $statusDummy }}
+                                        {{ $status }}
                                     </span>
                                 </td>
                                 <td class="whitespace-nowrap py-[22px] pl-3 pr-6 text-right text-sm font-medium">
@@ -340,7 +357,7 @@
                                         <a href="{{ route('layups.layers.index', $layup) }}" class="inline-flex items-center justify-center w-8 h-8 rounded border border-gray-200 bg-white text-gray-500 hover:text-green-600 hover:border-green-200 hover:bg-green-50 transition-colors focus:outline-none" title="View Details">
                                             <i class="fa-solid fa-eye"></i>
                                         </a>
-                                        <button type="button" @click.stop="isEdit = true; layupName = '{{ addslashes($layup->name) }}'; formAction = '{{ route('suppliers.layups.update', ['supplier' => $supplier->id, 'layup' => $layup->id]) }}'; showLayupModal = true;" class="inline-flex items-center justify-center w-8 h-8 rounded border border-gray-200 bg-white text-gray-500 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-colors focus:outline-none" title="Edit">
+                                        <button type="button" @click.stop="isEdit = true; layupName = '{{ addslashes($layup->name) }}'; layupStatus = '{{ $layup->status ?: 'Draft' }}'; layupCreatedBy = '{{ addslashes($layup->created_by ?? '') }}'; formAction = '{{ route('suppliers.layups.update', ['supplier' => $supplier->id, 'layup' => $layup->id]) }}'; showLayupModal = true;" class="inline-flex items-center justify-center w-8 h-8 rounded border border-gray-200 bg-white text-gray-500 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-colors focus:outline-none" title="Edit">
                                             <i class="fa-solid fa-pen-to-square"></i>
                                         </button>
                                         <form action="{{ route('suppliers.layups.destroy', ['supplier' => $supplier->id, 'layup' => $layup->id]) }}" method="POST" class="inline" onsubmit="return confirm('Delete this layup?');">
@@ -396,6 +413,28 @@
                                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                             @enderror
                                         </div>
+                                        <div class="mt-4">
+                                            <label for="status" class="block text-sm font-medium leading-6 text-gray-900">Status</label>
+                                            <div class="mt-2">
+                                                <select name="status" id="status" x-model="layupStatus" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-[#447A60] sm:text-sm sm:leading-6" required>
+                                                    <option value="Draft">Draft</option>
+                                                    <option value="Active">Active</option>
+                                                    <option value="Archived">Archived</option>
+                                                </select>
+                                            </div>
+                                            @error('status')
+                                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                            @enderror
+                                        </div>
+                                        <div class="mt-4">
+                                            <label for="created_by" class="block text-sm font-medium leading-6 text-gray-900">Created By</label>
+                                            <div class="mt-2">
+                                                <input type="text" name="created_by" id="created_by" x-model="layupCreatedBy" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-[#447A60] sm:text-sm sm:leading-6" placeholder="e.g. Eng. Dept A" required>
+                                            </div>
+                                            @error('created_by')
+                                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                            @enderror
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -440,6 +479,45 @@
                                             <div class="mt-2">
                                                 <input type="text" name="name" id="supplier_name" x-model="supplierNameEdit" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-[#447A60] sm:text-sm sm:leading-6" required autofocus>
                                             </div>
+                                            @error('name')
+                                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                            @enderror
+                                        </div>
+                                        <div class="mt-4">
+                                            <label for="primary_contact" class="block text-sm font-medium leading-6 text-gray-900">Primary Contact (Email)</label>
+                                            <div class="mt-2">
+                                                <input type="email" name="primary_contact" id="primary_contact" x-model="supplierContactEdit" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-[#447A60] sm:text-sm sm:leading-6" required>
+                                            </div>
+                                            @error('primary_contact')
+                                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                            @enderror
+                                        </div>
+                                        <div class="mt-4">
+                                            <label for="location" class="block text-sm font-medium leading-6 text-gray-900">Location</label>
+                                            <div class="mt-2">
+                                                <input type="text" name="location" id="location" x-model="supplierLocationEdit" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-[#447A60] sm:text-sm sm:leading-6" required>
+                                            </div>
+                                            @error('location')
+                                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                            @enderror
+                                        </div>
+                                        <div class="mt-4">
+                                            <label for="material_certifications" class="block text-sm font-medium leading-6 text-gray-900">Material Certifications</label>
+                                            <div class="mt-2">
+                                                <input type="text" name="material_certifications" id="material_certifications" x-model="supplierCertsEdit" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-[#447A60] sm:text-sm sm:leading-6" required>
+                                            </div>
+                                            @error('material_certifications')
+                                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                            @enderror
+                                        </div>
+                                        <div class="mt-4">
+                                            <label for="last_audit_date" class="block text-sm font-medium leading-6 text-gray-900">Last Audit Date</label>
+                                            <div class="mt-2">
+                                                <input type="date" name="last_audit_date" id="last_audit_date" x-model="supplierAuditEdit" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-[#447A60] sm:text-sm sm:leading-6" required>
+                                            </div>
+                                            @error('last_audit_date')
+                                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                            @enderror
                                         </div>
                                     </div>
                                 </div>

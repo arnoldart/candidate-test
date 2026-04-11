@@ -30,6 +30,22 @@ class SupplierRequest extends FormRequest
                 'max:255',
                 'unique:supplier,name,' . $supplierId,
             ],
+            'primary_contact' => ['required', 'email', 'max:255'],
+            'location' => ['required', 'string', 'max:255'],
+            'material_certifications' => ['required', 'string', 'max:255'],
+            'last_audit_date' => ['required', 'date'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'Nama supplier harus diisi',
+            'primary_contact.required' => 'Primary contact harus diisi',
+            'location.required' => 'Location harus diisi',
+            'material_certifications.required' => 'Material certifications harus diisi',
+            'last_audit_date.required' => 'Last audit date harus diisi',
+            'primary_contact.email' => 'Format email tidak valid',
         ];
     }
 }

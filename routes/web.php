@@ -25,6 +25,7 @@ Route::middleware('auth')->group(function () {
     Route::post('suppliers/{supplier}/import', [SupplierController::class, 'import'])->name('suppliers.import');
     Route::resource('suppliers.layups', CltLayupController::class)->except(['show', 'create', 'edit']);
     Route::post('layups/{layup}/layers/sync', [CltLayerController::class, 'sync'])->name('layups.layers.sync');
+    Route::post('layups/{layup}/duplicate', [CltLayupController::class, 'duplicate'])->name('layups.duplicate');
     Route::resource('layups.layers', CltLayerController::class)->except(['show', 'create', 'edit']);
 });
 

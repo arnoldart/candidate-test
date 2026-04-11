@@ -80,4 +80,23 @@ class CltLayupController extends Controller
         return redirect()->route('suppliers.layups.index', $supplier)
             ->with('success', 'CLT Layup berhasil dihapus.');
     }
+
+    /**
+     * Duplicate the specified resource and its layers.
+     */
+    public function duplicate(CltLayup $layup): RedirectResponse
+    {
+        $newLayup = $layup->replicate();
+        $newLayup->name = $layup->name . ' (Copy)';
+        $newLayup->save();
+
+        foreach ($layup->cltLayers as $layer) {
+            $newLayer = $layer->replicate();
+            $newLayer->layup_id = $newLayup->id;
+            $newLayer->save();
+        }
+
+        return redirect()->route('layups.layers.index', $newLayup)
+            ->with('success', 'CLT Layup berhasil diduplikasi.');
+    }
 }

@@ -14,6 +14,10 @@ class Supplier extends Model
 
     protected $fillable = [
         'name',
+        'primary_contact',
+        'location',
+        'material_certifications',
+        'last_audit_date',
     ];
 
     public function cltLayups(): HasMany

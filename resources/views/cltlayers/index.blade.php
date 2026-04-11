@@ -12,10 +12,13 @@
             </div>
             
             <div class="flex items-center gap-3">
-                <button type="button" class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-[#447A60] focus:ring-offset-2">
-                    <i class="fa-regular fa-copy mr-2 text-gray-500"></i>
-                    Duplicate
-                </button>
+                <form action="{{ route('layups.duplicate', $layup) }}" method="POST" class="inline" onsubmit="return confirm('Anda yakin ingin menduplikasi Layup ini?');">
+                    @csrf
+                    <button type="submit" class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-[#447A60] focus:ring-offset-2">
+                        <i class="fa-regular fa-copy mr-2 text-gray-500"></i>
+                        Duplicate
+                    </button>
+                </form>
                 <button type="submit" form="sync-form" class="inline-flex items-center justify-center rounded-md bg-[#447A60] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#36614D] transition-colors focus:outline-none focus:ring-2 focus:ring-[#447A60] focus:ring-offset-2">
                     <i class="fa-solid fa-floppy-disk mr-2 text-white"></i>
                     Save Changes
@@ -85,8 +88,14 @@
                     <h1 class="text-[28px] text-gray-900 tracking-tight font-bold" style="font-family: 'Merriweather', serif;">
                         Layup Specification: {{ $layup->name }}
                     </h1>
-                    <span class="inline-flex items-center rounded-full bg-[#E6F3EE] px-3 py-1 text-xs font-semibold text-[#36614D] border border-[#C5E1D4]">
-                        Active
+                    @php
+                        $status = $layup->status ?: 'Draft';
+                        $colorStatus = $status === 'Active' ? 'bg-[#E6F3EE] text-[#36614D] border-[#C5E1D4]' :
+                                      ($status === 'Draft' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : 
+                                      'bg-gray-100 text-gray-700 border-gray-200');
+                    @endphp
+                    <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold border {{ $colorStatus }}">
+                        {{ $status }}
                     </span>
                 </div>
                 <p class="text-[14px] text-gray-500 mt-1">Standard structural specification for {{ strtolower($layup->name) }}.</p>
@@ -95,7 +104,7 @@
             <div class="flex gap-10 md:pl-10 md:border-l md:border-gray-100">
                 <div>
                     <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Created By</span>
-                    <span class="block text-sm font-semibold text-gray-900">Eng. Dept A</span>
+                    <span class="block text-sm font-semibold text-gray-900">{{ $layup->created_by ?: '-' }}</span>
                 </div>
                 <div>
                     <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Last Modified</span>

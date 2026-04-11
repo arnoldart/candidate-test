@@ -14,6 +14,8 @@ class CltLayup extends Model
     protected $fillable = [
         "supplier_id",
         "name",
+        "status",
+        "created_by",
     ];
 
     public function supplier(): BelongsTo

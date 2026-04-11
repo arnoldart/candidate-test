@@ -20,6 +20,10 @@
             showModal: false,
             isEdit: false,
             supplierName: '',
+            supplierContact: '',
+            supplierLocation: '',
+            supplierCerts: '',
+            supplierAudit: '',
             formAction: '{{ route('suppliers.store') }}',
             init() {
                 window.addEventListener('open-supplier-modal', (e) => {
@@ -27,10 +31,18 @@
                     if (data.isEdit) {
                         this.isEdit = true;
                         this.supplierName = data.name;
+                        this.supplierContact = data.primary_contact || '';
+                        this.supplierLocation = data.location || '';
+                        this.supplierCerts = data.material_certifications || '';
+                        this.supplierAudit = data.last_audit_date || '';
                         this.formAction = '/suppliers/' + data.id;
                     } else {
                         this.isEdit = false;
                         this.supplierName = '';
+                        this.supplierContact = '';
+                        this.supplierLocation = '';
+                        this.supplierCerts = '';
+                        this.supplierAudit = '';
                         this.formAction = '{{ route('suppliers.store') }}';
                     }
                     this.showModal = true;
@@ -39,6 +51,10 @@
                 @if($errors->any())
                     this.showModal = true;
                     this.supplierName = '{{ old('name') }}';
+                    this.supplierContact = '{{ old('primary_contact') }}';
+                    this.supplierLocation = '{{ old('location') }}';
+                    this.supplierCerts = '{{ old('material_certifications') }}';
+                    this.supplierAudit = '{{ old('last_audit_date') }}';
                     @if(old('_method') == 'PUT')
                         this.isEdit = true;
                         this.formAction = '{{ old('action_url') ?? route('suppliers.index') }}';
@@ -127,7 +143,7 @@
                                         <a href="{{ route('suppliers.export', $supplier) }}" class="inline-flex items-center justify-center w-8 h-8 rounded border border-gray-200 bg-white text-gray-500 hover:text-[#447A60] hover:border-[#447A60] hover:bg-[#F0F7F4] transition-colors focus:outline-none" title="Export">
                                             <i class="fa-solid fa-file-export"></i>
                                         </a>
-                                        <button type="button" @click.stop="$dispatch('open-supplier-modal', { isEdit: true, id: {{ $supplier->id }}, name: '{{ addslashes($supplier->name) }}' })" class="inline-flex items-center justify-center w-8 h-8 rounded border border-gray-200 bg-white text-gray-500 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-colors focus:outline-none" title="Edit">
+                                        <button type="button" @click.stop="$dispatch('open-supplier-modal', { isEdit: true, id: {{ $supplier->id }}, name: '{{ addslashes($supplier->name) }}', primary_contact: '{{ addslashes($supplier->primary_contact ?? '') }}', location: '{{ addslashes($supplier->location ?? '') }}', material_certifications: '{{ addslashes($supplier->material_certifications ?? '') }}', last_audit_date: '{{ $supplier->last_audit_date ? \Carbon\Carbon::parse($supplier->last_audit_date)->format('Y-m-d') : '' }}' })" class="inline-flex items-center justify-center w-8 h-8 rounded border border-gray-200 bg-white text-gray-500 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-colors focus:outline-none" title="Edit">
                                             <i class="fa-solid fa-pen-to-square"></i>
                                         </button>
                                         <form action="{{ route('suppliers.destroy', $supplier) }}" method="POST" class="inline" onsubmit="return confirm('Delete this supplier?');" @click.stop>
@@ -177,11 +193,35 @@
                                         <div class="mt-4">
                                             <label for="name" class="block text-sm font-medium leading-6 text-gray-900">Supplier Name</label>
                                             <div class="mt-2">
-                                                <input type="text" name="name" id="name" x-model="supplierName" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-[#447A60] sm:text-sm sm:leading-6" placeholder="e.g. Nordic Timber Co." required autofocus>
+                                                <input type="text" name="name" id="name" x-model="supplierName" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-[#447A60] sm:text-sm sm:leading-6" required autofocus>
                                             </div>
                                             @error('name')
                                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                             @enderror
+                                        </div>
+                                        <div class="mt-4">
+                                            <label for="primary_contact" class="block text-sm font-medium leading-6 text-gray-900">Primary Contact (Email)</label>
+                                            <div class="mt-2">
+                                                <input type="email" name="primary_contact" id="primary_contact" x-model="supplierContact" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-[#447A60] sm:text-sm sm:leading-6">
+                                            </div>
+                                        </div>
+                                        <div class="mt-4">
+                                            <label for="location" class="block text-sm font-medium leading-6 text-gray-900">Location</label>
+                                            <div class="mt-2">
+                                                <input type="text" name="location" id="location" x-model="supplierLocation" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-[#447A60] sm:text-sm sm:leading-6">
+                                            </div>
+                                        </div>
+                                        <div class="mt-4">
+                                            <label for="material_certifications" class="block text-sm font-medium leading-6 text-gray-900">Material Certifications</label>
+                                            <div class="mt-2">
+                                                <input type="text" name="material_certifications" id="material_certifications" x-model="supplierCerts" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-[#447A60] sm:text-sm sm:leading-6">
+                                            </div>
+                                        </div>
+                                        <div class="mt-4">
+                                            <label for="last_audit_date" class="block text-sm font-medium leading-6 text-gray-900">Last Audit Date</label>
+                                            <div class="mt-2">
+                                                <input type="date" name="last_audit_date" id="last_audit_date" x-model="supplierAudit" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-[#447A60] sm:text-sm sm:leading-6">
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

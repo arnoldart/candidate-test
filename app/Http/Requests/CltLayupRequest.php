@@ -23,6 +23,17 @@ class CltLayupRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
+            'status' => 'required|string|in:Active,Draft,Archived',
+            'created_by' => 'required|string|max:255',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'Nama layup harus diisi',
+            'status.required' => 'Status harus dipilih',
+            'created_by.required' => 'Pembuat (Created By) harus diisi',
         ];
     }
 }
